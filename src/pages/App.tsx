@@ -177,7 +177,7 @@ const App = () => {
   return (
     <BrowserRouter>
       <Routes>
-        {/* すべてのルートでAppContentを表示 */}
+        {/* すべてのルートでAppContentを表示  */}
         <Route path="/*" element={<AppContent />} />
       </Routes>
     </BrowserRouter>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-// Props型定義
+// オープニング型定義
 interface OpeningProps {
   onComplete: () => void;
 }

@@ -9,7 +9,7 @@ import {
   ArrowUpTrayIcon 
 } from '@heroicons/react/24/outline';
 
-// Props型定義
+// チェックリストの型定義
 interface CheckListProps {
   cleaningData: {
     type: string;
