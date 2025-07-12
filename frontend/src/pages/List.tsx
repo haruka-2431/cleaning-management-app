@@ -18,6 +18,7 @@ const List = ({ setTitle }: ListProps) => {
   const editModalRef = useRef<EditModalHandle>(null);
   const { type } = useParams<{ type: EditConfigKey }>();
 
+  //typeが存在するかどうか
   if(!type || !(type in editConfig)) return <div>Not URLtype Found</div>;
 
   const currentList = editConfig[type] as EditConfig<ItemMap[typeof type]>;

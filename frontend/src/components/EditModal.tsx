@@ -2,8 +2,6 @@ import { forwardRef, useImperativeHandle, useRef, useState } from "react";
 import { EditModalHandle, EditModalProps, LayoutType, RendererEditModalProps } from "../configs/EditTypeConfig";
 import { editConfig } from "../configs/EditConfig";
 
-
-
 const EditModal = forwardRef<EditModalHandle, EditModalProps>((props, ref) => {
   const dialogRef = useRef<HTMLDialogElement>(null);
 

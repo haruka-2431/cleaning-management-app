@@ -30,6 +30,7 @@ export type EditConfig<T, P extends EditModalProps = EditModalProps> = {
   };
 };
 
+//Modalのタイプ
 export type LayoutType = "" | "add" | "update" | "delete" | "authentication";
 
 export type EditModalHandle = {
@@ -41,7 +42,7 @@ export type EditModalHandle = {
   close: () => void;
 } 
 
-//Modalの基本型
+//Modalの基本Props
 export interface EditModalProps {
   type: keyof ItemMap,
   onModalClose: () => void,
@@ -50,13 +51,13 @@ export interface EditModalProps {
   deleteItem: () => Promise<void>
 }
 
-//Modal内のConfigに対する型
+//Modal内のConfigに対するProps
 export interface ContentEditModalProps extends EditModalProps {
   inputValue: string[];
   setInputValue: (val: string[]) => void;
 }
 
-//ModalのRendererに対する型
+//ModalのRendererに対するProps
 export interface RendererEditModalProps extends EditModalProps {
   inputValue: string[];
   setInputValue: (val: string[]) => void;

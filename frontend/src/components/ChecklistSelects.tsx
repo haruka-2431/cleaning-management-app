@@ -11,7 +11,7 @@ export const ChecklistSelects = ({ onModalOpen }: Props) => {
 
   const [selectedAreaID, setSelectAreaID] = useState<number | "">("");
 
-  //清掃場所一覧取得
+  //cleaning_area一覧取得
   useEffect(() => {
     fetch("http://localhost:3000/cleaning-edit/cleaning_area")
       .then((res) => res.json())
@@ -19,7 +19,7 @@ export const ChecklistSelects = ({ onModalOpen }: Props) => {
       .catch(() => setAreaList([]));
   }, []);
 
-  //清掃場所が選ばれたら清掃箇所一覧取得
+  //清掃場所が選ばれたらcleaning_spot一覧取得
   useEffect(() => {
     if (selectedAreaID === "") {
       setLocationList([]);
