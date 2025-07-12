@@ -4,7 +4,7 @@ import {
   PowerIcon
 } from '@heroicons/react/24/outline';
 
-// Props型定義
+// マネージャーロール選択型定義
 interface ManagerSelectProps {
   onSelectRole: (role: 'admin' | 'worker') => void;
   onLogout?: (() => void) | null; // バックエンド実装時に使用
@@ -22,7 +22,7 @@ const ManagerSelect = ({
     <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
       <div className="w-full max-w-sm mx-auto space-y-4">
         
-        {/* 🔧 バックエンド実装時のログアウトボタン（現在は非表示） */}
+        {/* バックエンド実装時のログアウトボタン（現在は非表示） */}
         {onLogout && (
           <div className="absolute top-4 right-4">
             <button
@@ -35,7 +35,7 @@ const ManagerSelect = ({
           </div>
         )}
 
-        {/* 🔧 バックエンド実装時のユーザー情報（現在は非表示） */}
+        {/* バックエンド実装時のユーザー情報（現在は非表示） */}
         {userName && (
           <div className="text-center mb-8">
             <div className="w-16 h-16 bg-cyan-600 rounded-full flex items-center justify-center mx-auto mb-3">
