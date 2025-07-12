@@ -1,0 +1,13 @@
+@import 'tailwindcss';
+@plugin "daisyui";
+
+@theme {
+  --font-noto-sans-jp: 'Noto Sans JP', sans-serif;
+
+  --font-size-2xs: 0.625rem;
+  --font-size-3xs: 0.5rem;
+}
+
+dialog::backdrop {
+  background-color: rgba(0, 0, 0, 0.8);
+}
