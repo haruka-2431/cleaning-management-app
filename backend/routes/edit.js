@@ -95,6 +95,12 @@ function paramsBuilder(type, data, id = null){
       }
       return id ? [data.area_name, id] : [data.type_id, data.area_name];
 
+       case "cleaning_spot":
+      if (!data.area_id || !data.location){
+        throw new Error("Missing required fields for cleaning_spot");
+      }
+      return id ? [data.area_id, data.location, id] : [data.area_id, data.location];
+
     case "checklist":
       if (
         typeof data.area_id !== "number" ||
