@@ -24,9 +24,6 @@ const List = ({ setTitle }: ListProps) => {
   const currentList = editConfig[type] as EditConfig<ItemMap[typeof type]>;
   const [data, setData] = useState<ItemMap[typeof type][]>([]);
 
-  const [inputValue, setInputValue] = useState<string[]>([]);
-  const [selectID, setSelectID] = useState<number | null>(null);
-
   //初期データ取得
   useEffect(() => {
     if(currentList){
@@ -67,8 +64,6 @@ const List = ({ setTitle }: ListProps) => {
 
   const onModalClose = () => {
     editModalRef.current?.close();
-    setInputValue([]);
-    setSelectID(null);
   };
 
   //Data変換
@@ -109,8 +104,8 @@ const List = ({ setTitle }: ListProps) => {
     await fetchData();
   };
 
-  const deleteItem = async () => {
-    await fetch(`${API_URL}/${type}/${selectID}`, {
+  const deleteItem = async (id: number | null) => {
+    await fetch(`${API_URL}/${type}/${id}`, {
       method: "DELETE",
     });
     await fetchData();

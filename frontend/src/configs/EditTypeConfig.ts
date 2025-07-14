@@ -19,11 +19,12 @@ export type OnModalOpen = (
   ...value: string[]
 ) => void;
 
+//各typeにおけるModalを定義
 export type ModalRenderFunction<T, P extends EditModalProps = EditModalProps> = (props: P) => React.ReactNode;
 
 export type EditConfig<T, P extends EditModalProps = EditModalProps> = {
   title: string;
-  header: (onModalOpen: OnModalOpen) => React.ReactNode;
+  header: (onModalOpen: OnModalOpen, onFilterChange?: (areaID: number | "", spotID: number | "") => void) => React.ReactNode;
   row: (item: T, onModalOpen: OnModalOpen) => React.ReactNode;
   modals?: {
     [key in LayoutType]? : ModalRenderFunction<T, P>
@@ -48,7 +49,7 @@ export interface EditModalProps {
   onModalClose: () => void,
   addItem: (input: string[]) => Promise<void>,
   editItem: (input: string[], id: number | null) => Promise<void>,
-  deleteItem: () => Promise<void>
+  deleteItem: (id: number | null) => Promise<void>
 }
 
 //Modal内のConfigに対するProps

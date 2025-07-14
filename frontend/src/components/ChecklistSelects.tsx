@@ -11,6 +11,7 @@ export const ChecklistSelects = ({ onModalOpen }: Props) => {
   const [locationList, setLocationList] = useState<CleaningLocation[]>([]);
 
   const [selectedAreaID, setSelectAreaID] = useState<number | "">("");
+  const [selectedSpotID, setSelectedSpotID] = useState<number | "">("");
 
   //cleaning_area一覧取得
   useEffect(() => {
@@ -43,7 +44,7 @@ export const ChecklistSelects = ({ onModalOpen }: Props) => {
         >
           <option disabled value="">清掃場所を選択してください</option>
           {areaList.map((area) => (
-            <option key={area.id} value={area.area_name}>
+            <option key={area.id} value={area.id}>
               {area.area_name}
             </option>
           ))}
@@ -51,12 +52,14 @@ export const ChecklistSelects = ({ onModalOpen }: Props) => {
         <select
           className="w-50 lg:w-100 border rounded border-gray-300 select-xs"
           disabled={!selectedAreaID}
+          value={selectedSpotID}
+          onChange={(e) => setSelectedSpotID(e.target.value ? Number(e.target.value) : "")}
         >
           <option disabled value="">
             {selectedAreaID ? "清掃箇所を選択してください" : "先に清掃場所を選択してください"}
           </option>
           {locationList.map((location) => (
-            <option key={location.id} value={location.location}>
+            <option key={location.id} value={location.id}>
               {location.location}
             </option>
           ))}

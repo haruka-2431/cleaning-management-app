@@ -82,7 +82,7 @@ const EditModal = forwardRef<EditModalHandle, EditModalProps>((props, ref) => {
               onClick={() => {
                 if(layoutType === "add") props.addItem(inputValue);
                 if(layoutType === "update") props.editItem(inputValue, selectID);
-                if(layoutType === "delete") props.deleteItem();
+                if(layoutType === "delete") props.deleteItem(selectID);
                 props.onModalClose();
               }}
             >{btnLabel}</button>
