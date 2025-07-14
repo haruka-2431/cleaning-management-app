@@ -21,7 +21,7 @@ module.exports = (connection) => {
     handleQuery({
       type,
       key: action,
-      id,
+      params: [Number(id)],
       res,
       connection
     });
@@ -114,7 +114,6 @@ module.exports = (connection) => {
 
       case "checklist":
         if (
-          typeof data.area_id !== "number" ||
           typeof data.spot_id !== "number" ||
           typeof data.item !== "string" ||
           !data.item.trim()
@@ -122,8 +121,8 @@ module.exports = (connection) => {
           throw new Error("Missing or invalid fields for checklist");
         }
         return id
-          ? [data.area_id, data.spot_id, data.item, id]
-          : [data.area_id, data.spot_id, data.item];
+          ? [data.spot_id, data.item, id]
+          : [data.spot_id, data.item];
 
       default:
         throw new Error("Unsupported type for param building");

@@ -1,23 +1,36 @@
 import { EditConfig, ContentEditModalProps, ChecklistItem } from "../EditTypeConfig"
-import { ChecklistSelects } from "../../components/ChecklistSelects"
+import { ChecklistHeaderProps } from "../EditConfig";
+import { ChecklistSelects } from "../../components/ChecklistSelects";
 
-export const checklistConfig: EditConfig<ChecklistItem, ContentEditModalProps> = {
+export const checklistConfig: EditConfig<ChecklistItem, ContentEditModalProps, ChecklistHeaderProps> = {
   title: "チェックリスト",
-  header: (onModalOpen) => <ChecklistSelects onModalOpen={onModalOpen} />,
+  header: (onModalOpen, extraProps) => {
+    if(!extraProps) return null;
+
+    const{ selectedSpotID, setSelectedSpotID } = extraProps;
+
+    return (
+      <ChecklistSelects
+        onModalOpen={onModalOpen}
+        selectedSpotID={selectedSpotID}
+        setSelectedSpotID={setSelectedSpotID}
+      />
+    );
+  },
   row: (item, onModalOpen) => (
     <>
-      <td>{item.checklist}</td>
+      <td>{item.item}</td>
       <td>
         <div className="flex gap-2 justify-center">
           <button
             className="px-2 py-1 bg-teal-600 text-white rounded"
-            onClick={() => onModalOpen("update", item.id, item.checklist)}
+            onClick={() => onModalOpen("update", item.id, item.item)}
           >
             変更
           </button>
           <button
             className="px-2 py-1 bg-red-600 text-white rounded"
-            onClick={() => onModalOpen("delete", item.id, item.checklist)}
+            onClick={() => onModalOpen("delete", item.id, item.item)}
           >
             削除
           </button>

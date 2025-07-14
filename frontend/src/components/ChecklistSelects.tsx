@@ -4,14 +4,21 @@ import { API_URL } from "../pages/List";
 
 type CleaningLocation = { id: number; location: string };
 
-type Props = { onModalOpen: (layoutType: LayoutType) => void; };
+type Props = {
+  onModalOpen: (layoutType: LayoutType) => void;
+  selectedSpotID: number | "";
+  setSelectedSpotID: React.Dispatch<React.SetStateAction<number | "">>;
+};
 
-export const ChecklistSelects = ({ onModalOpen }: Props) => {
+export const ChecklistSelects = ({
+  onModalOpen,
+  selectedSpotID,
+  setSelectedSpotID,
+}: Props) => {
   const [areaList, setAreaList] = useState<CleaningAreaItem[]>([]);
   const [locationList, setLocationList] = useState<CleaningLocation[]>([]);
 
   const [selectedAreaID, setSelectAreaID] = useState<number | "">("");
-  const [selectedSpotID, setSelectedSpotID] = useState<number | "">("");
 
   //cleaning_area一覧取得
   useEffect(() => {
@@ -28,7 +35,7 @@ export const ChecklistSelects = ({ onModalOpen }: Props) => {
       return;
     }
 
-    fetch(API_URL + `/cleaning_spot?area_id=${selectedAreaID}`)
+    fetch(API_URL + `/cleaning_spot/select_spot/${selectedAreaID}`)
       .then((res) => res.json())
       .then((data) => setLocationList(data))
       .catch(() => setLocationList([]));

@@ -24,17 +24,31 @@ const List = ({ setTitle }: ListProps) => {
   const currentList = editConfig[type] as EditConfig<ItemMap[typeof type]>;
   const [data, setData] = useState<ItemMap[typeof type][]>([]);
 
+  //Checklistの差分表示機構
+  const [selectedSpotID, setSelectedSpotID] = useState<number | "">("");
+
+  useEffect(() => {
+    fetchData();
+    if(currentList?.title) setTitle
+  }, [type, selectedSpotID]);
+
   //初期データ取得
   useEffect(() => {
     if(currentList){
       fetchData();
       setTitle(currentList?.title || "データ一覧");
     }
-  }, [type]);
+  }, [type, selectedSpotID]);
 
   const fetchData =  async() => {
     try{
-      const url = `${API_URL}/${type}`;
+      let url = `${API_URL}/${type}`;
+
+      //清掃箇所が指定された場合のみ（checklist）
+      if(type === "checklist" && selectedSpotID !== ""){
+        url += `/select_spot/${selectedSpotID}`;
+      }
+
       const res = await fetch(url);
       if (!res.ok) {
       const errText = await res.text(); // 応答の中身を確認
@@ -43,6 +57,9 @@ const List = ({ setTitle }: ListProps) => {
     }
       const json = await res.json();
       setData(json);
+
+      //初期状態では表示されないよう変更（checklist）
+      if(type === "checklist" && selectedSpotID === "") setData([]);
     }catch(err) {
       console.log(err);
       setData([]);
@@ -120,6 +137,7 @@ const List = ({ setTitle }: ListProps) => {
           <ListHeader
             header={currentList.header}
             onModalOpen={onModalOpen}
+            extraProps={{ selectedSpotID, setSelectedSpotID }}
           />
           <ListBody
             data={data}

@@ -2,7 +2,7 @@
 export type UserItem = { id: number; name: string; email: string; position: string; status: boolean };
 export type CleaningTypeItem = { id: number; type_name: string };
 export type CleaningAreaItem = { id: number; type_name: string; area_name: string };
-export type ChecklistItem = { id: number; checklist: string };
+export type ChecklistItem = { id: number; item: string };
 
 export type ItemMap = {
   user: UserItem;
@@ -22,9 +22,9 @@ export type OnModalOpen = (
 //各typeにおけるModalを定義
 export type ModalRenderFunction<T, P extends EditModalProps = EditModalProps> = (props: P) => React.ReactNode;
 
-export type EditConfig<T, P extends EditModalProps = EditModalProps> = {
+export type EditConfig<T, P extends EditModalProps = EditModalProps, HProps = {}> = {
   title: string;
-  header: (onModalOpen: OnModalOpen, onFilterChange?: (areaID: number | "", spotID: number | "") => void) => React.ReactNode;
+  header: (onModalOpen: OnModalOpen, extraProps?: HProps) => React.ReactNode;
   row: (item: T, onModalOpen: OnModalOpen) => React.ReactNode;
   modals?: {
     [key in LayoutType]? : ModalRenderFunction<T, P>
