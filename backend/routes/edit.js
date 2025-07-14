@@ -114,9 +114,11 @@ function paramsBuilder(type, data, id = null){
 }
 
 function handleQuery({ type, key, params = [], res, connection }) {
+  //typeが有効の物かどうか
   if(!isValidType(type)) return res.status(400).send("Invalid table name");
 
   const sql = getSQL(type, key);
+  //指定されたSQLがあるかどうか
   if(!sql) return res.status(500).send("SQL Not Found");
 
   connection.query(sql, params, (err, result) => {

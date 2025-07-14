@@ -71,13 +71,13 @@ export const checklistConfig: EditConfig<ChecklistItem, ContentEditModalProps> =
         <div>
           <p className="py-2 text-xs text-gray-700">変更前</p>
           <p className="w-full px-3 py-1.5 border rounded-lg border-gray-300 text-sm text-slate-800">
-            {props.inputValue[0]}
+            {props.valueBefore[0]}
           </p>
           <p className="w-full px-3 py-1.5 border rounded-lg border-gray-300 text-sm text-slate-800">
-            {props.inputValue[1]}
+            {props.valueBefore[1]}
           </p>
           <p className="w-full px-3 py-1.5 border rounded-lg border-gray-300 text-sm text-slate-800">
-            {props.inputValue[2]}
+            {props.valueBefore[2]}
           </p>
         </div>
         <div className="mt-6 mb-1 flex justify-center text-black">

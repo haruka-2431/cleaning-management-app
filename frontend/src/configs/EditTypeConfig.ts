@@ -46,19 +46,21 @@ export type EditModalHandle = {
 export interface EditModalProps {
   type: keyof ItemMap,
   onModalClose: () => void,
-  addItem: () => Promise<void>,
-  editItem: () => Promise<void>,
+  addItem: (input: string[]) => Promise<void>,
+  editItem: (input: string[], id: number | null) => Promise<void>,
   deleteItem: () => Promise<void>
 }
 
 //Modal内のConfigに対するProps
 export interface ContentEditModalProps extends EditModalProps {
+  valueBefore: string[];
   inputValue: string[];
   setInputValue: (val: string[]) => void;
 }
 
 //ModalのRendererに対するProps
 export interface RendererEditModalProps extends EditModalProps {
+  valueBefore: string[];
   inputValue: string[];
   setInputValue: (val: string[]) => void;
   selectID: number | null;

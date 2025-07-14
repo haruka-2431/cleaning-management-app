@@ -8,7 +8,7 @@ import EditModal from "../components/EditModal";
 import { editConfig } from "../configs/EditConfig";
 import { ItemMap, EditConfig ,EditConfigKey, OnModalOpen, EditModalHandle } from "../configs/EditTypeConfig";
 
-const API_URL = "http://localhost:3000/cleaning-edit";
+export const API_URL = "http://localhost:3000/cleaning-edit";
 
 type ListProps = {
   setTitle: (title: string) => void;
@@ -91,20 +91,20 @@ const List = ({ setTitle }: ListProps) => {
   };
 
   //CRUD
-  const addItem = async() => {
+  const addItem = async(input: string[]) => {
     await fetch(`${API_URL}/${type}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(getItemFormat(type, inputValue)),
+      body: JSON.stringify(getItemFormat(type, input)),
     });
     await fetchData();
   };
 
-  const editItem = async () => {
-    await fetch(`${API_URL}/${type}/${selectID}`, {
+  const editItem = async (input: string[], id: number | null) => {
+    await fetch(`${API_URL}/${type}/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(getItemFormat(type, inputValue)),
+      body: JSON.stringify(getItemFormat(type, input)),
     });
     await fetchData();
   };
