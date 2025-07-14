@@ -1,105 +1,124 @@
 const express = require("express");
 const getSQL = require("../data/getSQL");
 
-const ALLOWED_TYPE = ["user", "cleaning_type", "cleaning_area", "cleaning_spot", "checklist"];
+const ALLOWED_TYPE = [
+  "user",
+  "cleaning_type",
+  "cleaning_area",
+  "cleaning_spot",
+  "checklist",
+  "cleaning_report",
+];
 
-function isValidType(type){
+function isValidType(type) {
   return ALLOWED_TYPE.includes(type);
 }
 
 module.exports = (connection) => {
   const router = express.Router();
 
-router.get("/:type", (req, res) => {
-  const type = req.params.type;
-  handleQuery({
-    type,
-    key: "select_all",
-    res,
-    connection
+  router.get("/:type", (req, res) => {
+    const type = req.params.type;
+    handleQuery({
+      type,
+      key: "select_all",
+      res,
+      connection,
+    });
   });
-});
 
-router.post("/:type", (req, res) => {
-  const type = req.params.type;
+  router.post("/:type", (req, res) => {
+    const type = req.params.type;
 
-  let params;
-  try{
-    params = paramsBuilder(type, req.body);
-  }catch(err){
-    return res.status(400).send(err.message);
-  }
+    let params;
+    try {
+      params = paramsBuilder(type, req.body);
+    } catch (err) {
+      return res.status(400).send(err.message);
+    }
 
-  handleQuery({
-    type,
-    key: "insert",
-    params,
-    res,
-    connection
+    handleQuery({
+      type,
+      key: "insert",
+      params,
+      res,
+      connection,
+    });
   });
-});
 
-router.put("/:type/:id", (req, res) => {
-  const type = req.params.type;
-  const id = Number(req.params.id);
+  router.put("/:type/:id", (req, res) => {
+    const type = req.params.type;
+    const id = Number(req.params.id);
 
-  let params;
-  try{
-    params = paramsBuilder(type, req.body, id);
-  }catch(err){
-    return res.status(400).send(err.message);
-  }
+    let params;
+    try {
+      params = paramsBuilder(type, req.body, id);
+    } catch (err) {
+      return res.status(400).send(err.message);
+    }
 
-  handleQuery({
-    type,
-    key: "update",
-    params,
-    res,
-    connection
+    handleQuery({
+      type,
+      key: "update",
+      params,
+      res,
+      connection,
+    });
   });
-});
 
-router.delete("/:type/:id", (req, res) => {
-  const type = req.params.type;
-  const id = Number(req.params.id);
-  handleQuery({
-    type,
-    key: "delete",
-    params: [id],
-    res,
-    connection
+  router.delete("/:type/:id", (req, res) => {
+    const type = req.params.type;
+    const id = Number(req.params.id);
+    handleQuery({
+      type,
+      key: "delete",
+      params: [id],
+      res,
+      connection,
+    });
   });
-});
 
   return router;
 };
 
-function paramsBuilder(type, data, id = null){
-  switch(type){
+function paramsBuilder(type, data, id = null) {
+  switch (type) {
     case "user":
-      if (!data.first_name || !data.last_name || !data.email || !data.position){
+      if (
+        !data.first_name ||
+        !data.last_name ||
+        !data.email ||
+        !data.position
+      ) {
         throw new Error("Missing required fields for user");
       }
-      const userParams = [data.first_name, data.last_name, data.email, data.position];
+      const userParams = [
+        data.first_name,
+        data.last_name,
+        data.email,
+        data.position,
+      ];
       return id ? [...userParams, id] : userParams;
 
     case "cleaning_type":
-      if (!data.type_name){
+      if (!data.type_name) {
         throw new Error("Missing required field 'type_name' for cleaning_type");
       }
       return id ? [data.type_name, id] : [data.type_name];
 
     case "cleaning_area":
-      if (!data.type_id || !data.area_name){
+      if (!data.type_id || !data.area_name) {
         throw new Error("Missing required fields for cleaning_area");
       }
       return id ? [data.area_name, id] : [data.type_id, data.area_name];
 
-       case "cleaning_spot":
-      if (!data.area_id || !data.location){
+    case "cleaning_spot":
+      if (!data.area_id || !data.location) {
         throw new Error("Missing required fields for cleaning_spot");
       }
-      return id ? [data.area_id, data.location, id] : [data.area_id, data.location];
+      return id
+        ? [data.area_id, data.location, id]
+        : [data.area_id, data.location];
 
     case "checklist":
       if (
@@ -107,12 +126,41 @@ function paramsBuilder(type, data, id = null){
         typeof data.spot_id !== "number" ||
         typeof data.item !== "string" ||
         !data.item.trim()
-      ){
+      ) {
         throw new Error("Missing or invalid fields for checklist");
       }
       return id
         ? [data.area_id, data.spot_id, data.item, id]
         : [data.area_id, data.spot_id, data.item];
+
+    case "cleaning_report":
+      if (
+        !data.user_id ||
+        !data.area_id ||
+        !data.start_datetime ||
+        !data.end_datetime ||
+        typeof data.status !== "boolean"
+      ) {
+        throw new Error("Missing required fields for cleaning_report");
+      }
+      return id
+        ? [
+            data.user_id,
+            data.sub_user_id,
+            data.area_id,
+            data.start_datetime,
+            data.end_datetime,
+            data.status,
+            id,
+          ]
+        : [
+            data.user_id,
+            data.sub_user_id,
+            data.area_id,
+            data.start_datetime,
+            data.end_datetime,
+            data.status,
+          ];
 
     default:
       throw new Error("Unsupported type for param building");
@@ -120,10 +168,10 @@ function paramsBuilder(type, data, id = null){
 }
 
 function handleQuery({ type, key, params = [], res, connection }) {
-  if(!isValidType(type)) return res.status(400).send("Invalid table name");
+  if (!isValidType(type)) return res.status(400).send("Invalid table name");
 
   const sql = getSQL(type, key);
-  if(!sql) return res.status(500).send("SQL Not Found");
+  if (!sql) return res.status(500).send("SQL Not Found");
 
   connection.query(sql, params, (err, result) => {
     if (err) {
