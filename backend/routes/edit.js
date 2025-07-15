@@ -1,9 +1,16 @@
 const express = require("express");
 const getSQL = require("../data/getSQL");
 
-const ALLOWED_TYPE = ["user", "cleaning_type", "cleaning_area", "cleaning_spot", "checklist"];
+const ALLOWED_TYPE = [
+  "user",
+  "cleaning_type",
+  "cleaning_area",
+  "cleaning_spot",
+  "checklist",
+  "cleaning_report",
+];
 
-function isValidType(type){
+function isValidType(type) {
   return ALLOWED_TYPE.includes(type);
 }
 
@@ -44,6 +51,7 @@ module.exports = (connection) => {
     try{
       params = paramsBuilder(type, req.body);
     }catch(err){
+      
       return res.status(400).send(err.message);
     }
 
@@ -59,6 +67,7 @@ module.exports = (connection) => {
   router.put("/:type/:id", (req, res) => {
     const type = req.params.type;
     const id = Number(req.params.id);
+
 
     let params;
     try{
@@ -136,6 +145,7 @@ module.exports = (connection) => {
     const sql = getSQL(type, key);
     //指定されたSQLがあるかどうか
     if(!sql) return res.status(500).send("SQL Not Found");
+
 
     connection.query(sql, params, (err, result) => {
       if (err) {
