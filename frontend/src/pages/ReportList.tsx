@@ -7,24 +7,24 @@ import {
 } from "@heroicons/react/24/outline";
 import { useNavigate } from "react-router-dom";
 
+
 // レポートデータの型定義
 interface Report {
   id: number;
-  担当者: string;
-  追加担当者: string;
-  清掃タイプ: string;
-  清掃場所: string;
-  作業開始日時: string;
-  作業終了日時: string;
-  確認済み: boolean;
+  user: string;
+  subUser?: string;
+  type: string;
+  area: string;
+  startDatetime: string;
+  endDatetime: string;
+  status: boolean;
 }
 
 // タブの型定義
 type TabType = "unconfirmed" | "confirmed";
 
 const ReportList = () => {
-  const nav = useNavigate();
-
+   const nav = useNavigate();
   const [activeTab, setActiveTab] = useState<TabType>("unconfirmed");
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
   const [showDetailModal, setShowDetailModal] = useState<boolean>(false);
@@ -33,148 +33,148 @@ const ReportList = () => {
   const reportData: Report[] = [
     {
       id: 1,
-      担当者: "田中太郎",
-      追加担当者: "佐藤花子",
-      清掃タイプ: "民泊清掃",
-      清掃場所: "天神民泊",
-      作業開始日時: "2024-01-15 09:00",
-      作業終了日時: "2024-01-15 12:30",
-      確認済み: false,
+      user: "田中太郎",
+      subUser: "佐藤花子",
+      type: "民泊清掃",
+      area: "天神民泊",
+      startDatetime: "2024-01-15 09:00",
+      endDatetime: "2024-01-15 12:30",
+      status: false,
     },
     {
       id: 2,
-      担当者: "山田次郎",
-      追加担当者: "-",
-      清掃タイプ: "施設清掃",
-      清掃場所: "",
-      作業開始日時: "2024-01-15 14:00",
-      作業終了日時: "2024-01-15 17:00",
-      確認済み: false,
+      user: "山田次郎",
+      subUser: "-",
+      type: "施設清掃",
+      area: "",
+      startDatetime: "2024-01-15 14:00",
+      endDatetime: "2024-01-15 17:00",
+      status: false,
     },
     {
       id: 3,
-      担当者: "鈴木美咲",
-      追加担当者: "高橋健太",
-      清掃タイプ: "ハウスクリーニング",
-      清掃場所: "-",
-      作業開始日時: "2024-01-14 10:00",
-      作業終了日時: "2024-01-14 15:30",
-      確認済み: true,
+      user: "鈴木美咲",
+      subUser: "高橋健太",
+      type: "ハウスクリーニング",
+      area: "-",
+      startDatetime: "2024-01-14 10:00",
+      endDatetime: "2024-01-14 15:30",
+      status: true,
     },
     {
       id: 4,
-      担当者: "佐藤花子",
-      追加担当者: "-",
-      清掃タイプ: "巡回清掃",
-      清掃場所: "ゆうはな",
-      作業開始日時: "2024-01-14 08:00",
-      作業終了日時: "2024-01-14 10:00",
-      確認済み: true,
+      user: "佐藤花子",
+      subUser: "-",
+      type: "巡回清掃",
+      area: "ゆうはな",
+      startDatetime: "2024-01-14 08:00",
+      endDatetime: "2024-01-14 10:00",
+      status: true,
     },
     {
       id: 5,
-      担当者: "高橋健太",
-      追加担当者: "田中太郎",
-      清掃タイプ: "民泊清掃",
-      清掃場所: "春吉民泊",
-      作業開始日時: "2024-01-13 11:00",
-      作業終了日時: "2024-01-13 14:30",
-      確認済み: false,
+      user: "高橋健太",
+      subUser: "田中太郎",
+      type: "民泊清掃",
+      area: "春吉民泊",
+      startDatetime: "2024-01-13 11:00",
+      endDatetime: "2024-01-13 14:30",
+      status: false,
     },
     {
       id: 6,
-      担当者: "田中太郎",
-      追加担当者: "-",
-      清掃タイプ: "施設清掃",
-      清掃場所: "ゆうはな",
-      作業開始日時: "2024-01-13 15:00",
-      作業終了日時: "2024-01-13 18:00",
-      確認済み: true,
+      user: "田中太郎",
+      subUser: "-",
+      type: "施設清掃",
+      area: "ゆうはな",
+      startDatetime: "2024-01-13 15:00",
+      endDatetime: "2024-01-13 18:00",
+      status: true,
     },
     {
       id: 7,
-      担当者: "田中太郎",
-      追加担当者: "-",
-      清掃タイプ: "施設清掃",
-      清掃場所: "ゆうはな",
-      作業開始日時: "2024-01-13 15:00",
-      作業終了日時: "2024-01-13 18:00",
-      確認済み: true,
+      user: "田中太郎",
+      subUser: "-",
+      type: "施設清掃",
+      area: "ゆうはな",
+      startDatetime: "2024-01-13 15:00",
+      endDatetime: "2024-01-13 18:00",
+      status: true,
     },
     {
       id: 8,
-      担当者: "田中太郎",
-      追加担当者: "-",
-      清掃タイプ: "施設清掃",
-      清掃場所: "ゆうはな",
-      作業開始日時: "2024-01-13 15:00",
-      作業終了日時: "2024-01-13 18:00",
-      確認済み: true,
+      user: "田中太郎",
+      subUser: "-",
+      type: "施設清掃",
+      area: "ゆうはな",
+      startDatetime: "2024-01-13 15:00",
+      endDatetime: "2024-01-13 18:00",
+      status: true,
     },
     {
       id: 9,
-      担当者: "田中太郎",
-      追加担当者: "-",
-      清掃タイプ: "施設清掃",
-      清掃場所: "ゆうはな",
-      作業開始日時: "2024-01-13 15:00",
-      作業終了日時: "2024-01-13 18:00",
-      確認済み: true,
+      user: "田中太郎",
+      subUser: "-",
+      type: "施設清掃",
+      area: "ゆうはな",
+      startDatetime: "2024-01-13 15:00",
+      endDatetime: "2024-01-13 18:00",
+      status: true,
     },
     {
       id: 10,
-      担当者: "田中太郎",
-      追加担当者: "-",
-      清掃タイプ: "施設清掃",
-      清掃場所: "",
-      作業開始日時: "2024-01-13 15:00",
-      作業終了日時: "2024-01-13 18:00",
-      確認済み: true,
+      user: "田中太郎",
+      subUser: "-",
+      type: "施設清掃",
+      area: "",
+      startDatetime: "2024-01-13 15:00",
+      endDatetime: "2024-01-13 18:00",
+      status: true,
     },
     {
       id: 11,
-      担当者: "田中太郎",
-      追加担当者: "-",
-      清掃タイプ: "施設清掃",
-      清掃場所: "ゆうはな",
-      作業開始日時: "2024-01-13 15:00",
-      作業終了日時: "2024-01-13 18:00",
-      確認済み: true,
+      user: "田中太郎",
+      subUser: "-",
+      type: "施設清掃",
+      area: "ゆうはな",
+      startDatetime: "2024-01-13 15:00",
+      endDatetime: "2024-01-13 18:00",
+      status: true,
     },
     {
       id: 12,
-      担当者: "田中太郎",
-      追加担当者: "-",
-      清掃タイプ: "施設清掃",
-      清掃場所: "ゆうはな",
-      作業開始日時: "2024-01-13 15:00",
-      作業終了日時: "2024-01-13 18:00",
-      確認済み: true,
+      user: "田中太郎",
+      subUser: "-",
+      type: "施設清掃",
+      area: "ゆうはな",
+      startDatetime: "2024-01-13 15:00",
+      endDatetime: "2024-01-13 18:00",
+      status: true,
     },
     {
       id: 13,
-      担当者: "田中太郎",
-      追加担当者: "-",
-      清掃タイプ: "施設清掃",
-      清掃場所: "ゆうはな",
-      作業開始日時: "2024-01-13 15:00",
-      作業終了日時: "2024-01-13 18:00",
-      確認済み: true,
+      user: "田中太郎",
+      subUser: "-",
+      type: "施設清掃",
+      area: "ゆうはな",
+      startDatetime: "2024-01-13 15:00",
+      endDatetime: "2024-01-13 18:00",
+      status: true,
     },
     {
       id: 14,
-      担当者: "田中太郎",
-      追加担当者: "-",
-      清掃タイプ: "施設清掃",
-      清掃場所: "ゆうはな",
-      作業開始日時: "2024-01-13 15:00",
-      作業終了日時: "2024-01-13 18:00",
-      確認済み: true,
+      user: "田中太郎",
+      subUser: "-",
+      type: "施設清掃",
+      area: "ゆうはな",
+      startDatetime: "2024-01-13 15:00",
+      endDatetime: "2024-01-13 18:00",
+      status: true,
     },
   ];
 
   const filteredReports = reportData.filter((report) =>
-    activeTab === "unconfirmed" ? !report.確認済み : report.確認済み
+    activeTab === "unconfirmed" ? !report.status : report.status
   );
 
   const openDetailModal = (report: Report) => {
@@ -245,21 +245,21 @@ const ReportList = () => {
                   key={report.id}
                   className="py-3 px-4 border-b border-gray-200 hover:bg-gray-50 grid grid-cols-[1fr_1fr_2fr_80px] lg:grid-cols-[1fr_1fr_1fr_1fr_2fr_2fr_80px] gap-4 items-center"
                 >
-                  <div className="text-xs lg:text-[16px]">{report.担当者}</div>
+                  <div className="text-xs lg:text-[16px]">{report.user}</div>
                   <div className="hidden lg:block lg:text-[16px]">
-                    {report.追加担当者 || "-"}
+                    {report.subUser || "-"}
                   </div>
                   <div className="text-xs lg:text-[16px]">
-                    {report.清掃タイプ}
+                    {report.type}
                   </div>
                   <div className="hidden lg:block lg:text-[16px]">
-                    {report.清掃場所}
+                    {report.area}
                   </div>
                   <div className="text-xs lg:text-sm font-mono">
-                    {report.作業開始日時}
+                    {report.startDatetime}
                   </div>
                   <div className="hidden lg:block text-xs lg:text-sm font-mono">
-                    {report.作業終了日時}
+                    {report.endDatetime}
                   </div>
                   <div className="flex justify-center">
                     <button
@@ -345,13 +345,13 @@ const ReportList = () => {
                         担当者
                       </td>
                       <td className="p-2 lg:p-3 text-xs lg:text-sm border-r border-gray-300 w-1/4">
-                        {selectedReport.担当者}
+                        {selectedReport.user}
                       </td>
                       <td className="hide-on-mobile bg-gray-100 p-2 lg:p-3 font-medium text-xs lg:text-sm border-r border-gray-300 w-1/4">
                         清掃場所
                       </td>
                       <td className="hide-on-mobile p-2 lg:p-3 text-xs lg:text-sm w-1/4">
-                        {selectedReport.清掃場所}
+                        {selectedReport.area}
                       </td>
                     </tr>
                     <tr className="border-b border-gray-300">
@@ -359,13 +359,13 @@ const ReportList = () => {
                         追加担当者
                       </td>
                       <td className="p-2 lg:p-3 text-xs lg:text-sm border-r border-gray-300">
-                        {selectedReport.追加担当者 || "-"}
+                        {selectedReport.subUser || "-"}
                       </td>
                       <td className="hide-on-mobile bg-gray-100 p-2 lg:p-3 font-medium text-xs lg:text-sm border-r border-gray-300">
                         作業開始日時
                       </td>
                       <td className="hide-on-mobile p-2 lg:p-3 text-xs lg:text-sm font-mono">
-                        {selectedReport.作業開始日時}
+                        {selectedReport.startDatetime}
                       </td>
                     </tr>
                     <tr>
@@ -373,13 +373,13 @@ const ReportList = () => {
                         清掃タイプ
                       </td>
                       <td className="p-2 lg:p-3 text-xs lg:text-sm border-r border-gray-300">
-                        {selectedReport.清掃タイプ}
+                        {selectedReport.type}
                       </td>
                       <td className="hide-on-mobile bg-gray-100 p-2 lg:p-3 font-medium text-xs lg:text-sm border-r border-gray-300">
                         作業終了日時
                       </td>
                       <td className="hide-on-mobile p-2 lg:p-3 text-xs lg:text-sm font-mono">
-                        {selectedReport.作業終了日時}
+                        {selectedReport.endDatetime}
                       </td>
                     </tr>
                   </tbody>
@@ -393,7 +393,7 @@ const ReportList = () => {
                         清掃場所
                       </td>
                       <td className="p-2 text-xs w-1/2">
-                        {selectedReport.清掃場所}
+                        {selectedReport.area}
                       </td>
                     </tr>
                     <tr className="border-b border-gray-300">
@@ -401,7 +401,7 @@ const ReportList = () => {
                         作業開始日時
                       </td>
                       <td className="p-2 text-xs font-mono">
-                        {selectedReport.作業開始日時}
+                        {selectedReport.startDatetime}
                       </td>
                     </tr>
                     <tr>
@@ -409,7 +409,7 @@ const ReportList = () => {
                         作業終了日時
                       </td>
                       <td className="p-2 text-xs font-mono">
-                        {selectedReport.作業終了日時}
+                        {selectedReport.endDatetime}
                       </td>
                     </tr>
                   </tbody>
@@ -443,7 +443,7 @@ const ReportList = () => {
                   <ArrowDownTrayIcon className="w-4 h-4 lg:w-5 lg:h-5 text-white" />
                 </button>
 
-                {selectedReport.確認済み ? (
+                {selectedReport.status ? (
                   // 確認済みの場合：ステータス表示
                   <div className="flex items-center justify-center gap-2 py-3 lg:py-4 bg-teal-50 border border-teal-200 rounded-lg">
                     <CheckIcon className="w-5 h-5 lg:w-6 lg:h-6 text-teal-600" />
@@ -480,10 +480,8 @@ const ReportList = () => {
 
       {/* 固定編集ボタン */}
         <div className="fixed bottom-0 left-0 right-0 px-4 py-8 z-10 bg-white">
-          <button 
-            className="btn bg-cyan-800 text-white w-full gap-2 shadow-lg h-14"
-            onClick={() => nav("/adimn/cleaning-edit")}
-          >
+          <button className="btn bg-cyan-800 text-white w-full gap-2 shadow-lg h-14"
+          onClick={() => nav("/adimn/cleaning-edit")}>
             データの編集
             <svg
               xmlns="http://www.w3.org/2000/svg"
