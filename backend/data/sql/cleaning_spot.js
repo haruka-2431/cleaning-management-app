@@ -1,3 +1,4 @@
+
 module.exports ={
   select_all: `
     select id, area_id, location from cleaning_spot;
@@ -7,3 +8,4 @@ module.exports ={
     where area_id = ?;
   `
 }
+
