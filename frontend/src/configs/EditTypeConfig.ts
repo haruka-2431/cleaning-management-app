@@ -2,7 +2,7 @@
 export type UserItem = { id: number; name: string; email: string; position: string; status: boolean };
 export type CleaningTypeItem = { id: number; type_name: string };
 export type CleaningAreaItem = { id: number; type_name: string; area_name: string };
-export type ChecklistItem = { id: number; item: string };
+export type ChecklistItem = { id: number; area_name: string; location: string; item: string };
 
 export type ItemMap = {
   user: UserItem;

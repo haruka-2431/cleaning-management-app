@@ -1,6 +1,7 @@
 import { useRef, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
+import Header from "../components/Header";
 import ListHeader from "../components/ListHeader";
 import ListBody from "../components/ListBody";
 import EditModal from "../components/EditModal";
@@ -11,10 +12,11 @@ import { ItemMap, EditConfig ,EditConfigKey, OnModalOpen, EditModalHandle } from
 export const API_URL = "http://localhost:3000/cleaning-edit";
 
 type ListProps = {
+  title: string;
   setTitle: (title: string) => void;
 }
 
-const List = ({ setTitle }: ListProps) => {
+const List = ({ title, setTitle }: ListProps) => {
   const editModalRef = useRef<EditModalHandle>(null);
   const { type } = useParams<{ type: EditConfigKey }>();
 
@@ -96,7 +98,7 @@ const List = ({ setTitle }: ListProps) => {
       case "cleaning_area":
         return { type_name: value[0], area_name: value[1] };
       case "checklist":
-        return { item: value[0] };
+        return { area_name: value[0], location: value[1], item: value[2] };
       default:
         return {};
     }
@@ -131,30 +133,33 @@ const List = ({ setTitle }: ListProps) => {
   if(!currentList) return <div>Not Found</div>;
 
   return (
-    <main className="flex-grow overflow-x-auto bg-white">
-      <div className="relative overflow-y-auto mx-auto max-w-320 max-h-[calc(100vh-4.5rem)] lg:max-h-[calc(100vh-6.25rem)]">
-        <table className="table w-full border-collapse text-center">
-          <ListHeader
-            header={currentList.header}
-            onModalOpen={onModalOpen}
-            extraProps={{ selectedSpotID, setSelectedSpotID }}
-          />
-          <ListBody
-            data={data}
-            row={currentList.row}
-            onModalOpen={onModalOpen}
-          />
-       </table>
-      </div>
-      <EditModal
-        ref={editModalRef}
-        type={type}
-        onModalClose={onModalClose}
-        addItem={addItem}
-        editItem={editItem}
-        deleteItem={deleteItem}
-      />
-    </main>
+    <div className="flex flex-col min-h-screen">
+      <Header title={title}/>
+      <main className="flex-grow overflow-x-auto bg-white">
+        <div className="relative overflow-y-auto mx-auto max-w-320 max-h-[calc(100vh-4.5rem)] lg:max-h-[calc(100vh-6.25rem)]">
+          <table className="table w-full border-collapse text-center">
+            <ListHeader
+              header={currentList.header}
+              onModalOpen={onModalOpen}
+              extraProps={{ selectedSpotID, setSelectedSpotID }}
+            />
+            <ListBody
+              data={data}
+              row={currentList.row}
+              onModalOpen={onModalOpen}
+            />
+        </table>
+        </div>
+        <EditModal
+          ref={editModalRef}
+          type={type}
+          onModalClose={onModalClose}
+          addItem={addItem}
+          editItem={editItem}
+          deleteItem={deleteItem}
+        />
+      </main>
+    </div>
   );
 };
 
