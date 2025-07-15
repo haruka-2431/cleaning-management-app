@@ -4,8 +4,6 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import { AuthProvider } from "./contexts/AuthContext";
 
 import ProtectedRoute from "./components/ProtectedRoute";
-import OpeningAnimation from "./pages/Opening";
-
 import ManagerSelect from "./pages/ManagerSelect";
 import CleanSelect from "./pages/CleanSelect";
 import CheckList from "./pages/CheckList";

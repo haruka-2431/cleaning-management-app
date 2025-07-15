@@ -4,9 +4,9 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import Header from '../components/Header';
 import { checklistTemplates, getTemplateByTypeAndLocation } from '../components/CheckListItem';
 import { PlusIcon } from '@heroicons/react/24/outline';
-import ChecklistSection from '../components/CheckListSection'; // 新しいコンポーネント
-import ReportModal from '../components/ReportModal';         // 新しいコンポーネント
-import CompletedScreen from '../components/CompletedScreen';   // 新しいコンポーネント
+import ChecklistSection from '../components/CheckListSection'; 
+import ReportModal from '../components/ReportModal';       
+import CompletedScreen from '../components/CompletedScreen';   
 
 interface CheckedItems {
   [key: string]: boolean;
