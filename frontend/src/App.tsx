@@ -16,6 +16,12 @@ import List from "./pages/List";
 
 const App = () => {
   const [title, setTitle] = useState<string>("");
+  const [isAppInitialized, setIsAppInitialized] = useState(false);
+
+  // 初回のみ表示
+  if(!isAppInitialized){
+    return <OpeningAnimation onComplete={() => setIsAppInitialized(true)}/>
+  }
 
   return (
     <AuthProvider>
