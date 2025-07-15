@@ -2,22 +2,22 @@ import { forwardRef, useImperativeHandle, useRef, useState } from "react";
 import { EditModalHandle, EditModalProps, LayoutType, RendererEditModalProps } from "../configs/EditTypeConfig";
 import { editConfig } from "../configs/EditConfig";
 
-
-
 const EditModal = forwardRef<EditModalHandle, EditModalProps>((props, ref) => {
   const dialogRef = useRef<HTMLDialogElement>(null);
 
   const [inputValue, setInputValue] = useState<string[]>([]);
+  const [valueBefore, setValueBefore] = useState<string[]>([]);
   const [selectID, setSelectID] = useState<number | null>(null);
   const [layoutType, setLayoutType] = useState<LayoutType>("");
 
   //showModal・closeを外部から使えるようにする
   useImperativeHandle(ref, ()=> ({
     showModal: ({ inputValue, selectID, layoutType }) => {
-      setInputValue(inputValue),
-      setSelectID(selectID),
-      setLayoutType(layoutType),
-      dialogRef.current?.showModal()
+      setValueBefore(inputValue);
+      setInputValue(inputValue);
+      setSelectID(selectID);
+      setLayoutType(layoutType);
+      dialogRef.current?.showModal();
     },
     close: () => dialogRef.current?.close(),
   }));
@@ -31,6 +31,7 @@ const EditModal = forwardRef<EditModalHandle, EditModalProps>((props, ref) => {
     addItem: props.addItem,
     editItem: props.editItem,
     deleteItem: props.deleteItem,
+    valueBefore,
     inputValue,
     setInputValue,
     selectID,
@@ -64,7 +65,7 @@ const EditModal = forwardRef<EditModalHandle, EditModalProps>((props, ref) => {
     <dialog ref={dialogRef} className="modal backdrop:bg-black backdrop:opacity-70">
       <div className="modal-box w-full p-0 bg-white border border-gray-200 shadow-2xl">
         <div className="modal-action w-full mt-0 flex flex-col items-center">
-          <form method="dialog" onSubmit={(e) => e.preventDefault()}>
+          <form method="dialog">
             <button
               type="button"
               className="btn btn-xs btn-circle absolute top-2 right-5 bg-gray-100 border border-gray-100"
@@ -79,9 +80,9 @@ const EditModal = forwardRef<EditModalHandle, EditModalProps>((props, ref) => {
               type="button"
               className="btn btn-sm absolute bottom-6 right-6 bg-sky-800 rounded-lg border-cyan-800 text-sm text-white"
               onClick={() => {
-                if(layoutType === "add") props.addItem();
-                if(layoutType === "update") props.editItem();
-                if(layoutType === "delete") props.deleteItem();
+                if(layoutType === "add") props.addItem(inputValue);
+                if(layoutType === "update") props.editItem(inputValue, selectID);
+                if(layoutType === "delete") props.deleteItem(selectID);
                 props.onModalClose();
               }}
             >{btnLabel}</button>

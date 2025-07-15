@@ -1,24 +1,71 @@
 import "./css/style.css";
 import { useState } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider } from "./contexts/AuthContext";
 
-import Header from "./components/Header";
+import ProtectedRoute from "./components/ProtectedRoute";
+import OpeningAnimation from "./pages/Opening";
+
+import ManagerSelect from "./pages/ManagerSelect";
+import CleanSelect from "./pages/CleanSelect";
+import CheckList from "./pages/CheckList";
+
+import ReportList from "./pages/ReportList";
 import CleaningEdit from "./pages/CleaningEdit";
 import List from "./pages/List";
 
 const App = () => {
-  const [title, setTitle] = useState<string>("編集画面");
+  const [title, setTitle] = useState<string>("");
 
   return (
-    <Router>
-      <div className="flex flex-col min-h-screen">
-        <Header title={title}/>
+    <AuthProvider>
+      <Router>
         <Routes>
-          <Route path="/cleaning-edit" element={<CleaningEdit setTitle={setTitle}/>} />
-          <Route path="/cleaning-edit/:type" element={<List setTitle={setTitle}/>}/>
+          <Route path="/" element={<Navigate to="/manager-select" />}/>
+          <Route path="/manager-select" element={<ManagerSelect />}/>
+          <Route
+            path="/worker"
+            element={
+              <ProtectedRoute allowedRoles={["worker"]}>
+                <CleanSelect />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/worker/checklist"
+            element={
+              <ProtectedRoute allowedRoles={["worker"]}>
+                <CheckList />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin" element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <ReportList />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/adimn/cleaning-edit"
+            element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <CleaningEdit title={title} setTitle={setTitle}/>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/cleaning-edit/:type"
+            element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <List title={title} setTitle={setTitle}/>
+              </ProtectedRoute>
+            }
+          />
+          <Route path="*" element={<Navigate to="/manager-select" replace />} />
         </Routes>
-      </div>
-    </Router>
+      </Router>
+    </AuthProvider>
   );
 };
 

@@ -1,32 +1,41 @@
 import { useState, useEffect } from "react";
 import { CleaningAreaItem, LayoutType } from "../configs/EditTypeConfig";
+import { API_URL } from "../pages/List";
 
 type CleaningLocation = { id: number; location: string };
 
-type Props = { onModalOpen: (layoutType: LayoutType) => void; };
+type Props = {
+  onModalOpen: (layoutType: LayoutType) => void;
+  selectedSpotID: number | "";
+  setSelectedSpotID: React.Dispatch<React.SetStateAction<number | "">>;
+};
 
-export const ChecklistSelects = ({ onModalOpen }: Props) => {
+export const ChecklistSelects = ({
+  onModalOpen,
+  selectedSpotID,
+  setSelectedSpotID,
+}: Props) => {
   const [areaList, setAreaList] = useState<CleaningAreaItem[]>([]);
   const [locationList, setLocationList] = useState<CleaningLocation[]>([]);
 
   const [selectedAreaID, setSelectAreaID] = useState<number | "">("");
 
-  //清掃場所一覧取得
+  //cleaning_area一覧取得
   useEffect(() => {
-    fetch("http://localhost:3000/cleaning-edit/cleaning_area")
+    fetch(API_URL + "/cleaning_area")
       .then((res) => res.json())
       .then((data) => setAreaList(data))
       .catch(() => setAreaList([]));
   }, []);
 
-  //清掃場所が選ばれたら清掃箇所一覧取得
+  //清掃場所が選ばれたらcleaning_spot一覧取得
   useEffect(() => {
     if (selectedAreaID === "") {
       setLocationList([]);
       return;
     }
 
-    fetch(`http://localhost:3000/cleaning-edit/cleaning_spot?area_id=${selectedAreaID}`)
+    fetch(API_URL + `/cleaning_spot/select_spot/${selectedAreaID}`)
       .then((res) => res.json())
       .then((data) => setLocationList(data))
       .catch(() => setLocationList([]));
@@ -42,7 +51,7 @@ export const ChecklistSelects = ({ onModalOpen }: Props) => {
         >
           <option disabled value="">清掃場所を選択してください</option>
           {areaList.map((area) => (
-            <option key={area.id} value={area.area_name}>
+            <option key={area.id} value={area.id}>
               {area.area_name}
             </option>
           ))}
@@ -50,12 +59,14 @@ export const ChecklistSelects = ({ onModalOpen }: Props) => {
         <select
           className="w-50 lg:w-100 border rounded border-gray-300 select-xs"
           disabled={!selectedAreaID}
+          value={selectedSpotID}
+          onChange={(e) => setSelectedSpotID(e.target.value ? Number(e.target.value) : "")}
         >
           <option disabled value="">
             {selectedAreaID ? "清掃箇所を選択してください" : "先に清掃場所を選択してください"}
           </option>
           {locationList.map((location) => (
-            <option key={location.id} value={location.location}>
+            <option key={location.id} value={location.id}>
               {location.location}
             </option>
           ))}

@@ -2,7 +2,7 @@
 export type UserItem = { id: number; name: string; email: string; position: string; status: boolean };
 export type CleaningTypeItem = { id: number; type_name: string };
 export type CleaningAreaItem = { id: number; type_name: string; area_name: string };
-export type ChecklistItem = { id: number; checklist: string };
+export type ChecklistItem = { id: number; area_name: string; location: string; item: string };
 
 export type ItemMap = {
   user: UserItem;
@@ -19,17 +19,19 @@ export type OnModalOpen = (
   ...value: string[]
 ) => void;
 
+//各typeにおけるModalを定義
 export type ModalRenderFunction<T, P extends EditModalProps = EditModalProps> = (props: P) => React.ReactNode;
 
-export type EditConfig<T, P extends EditModalProps = EditModalProps> = {
+export type EditConfig<T, P extends EditModalProps = EditModalProps, HProps = {}> = {
   title: string;
-  header: (onModalOpen: OnModalOpen) => React.ReactNode;
+  header: (onModalOpen: OnModalOpen, extraProps?: HProps) => React.ReactNode;
   row: (item: T, onModalOpen: OnModalOpen) => React.ReactNode;
   modals?: {
     [key in LayoutType]? : ModalRenderFunction<T, P>
   };
 };
 
+//Modalのタイプ
 export type LayoutType = "" | "add" | "update" | "delete" | "authentication";
 
 export type EditModalHandle = {
@@ -41,23 +43,25 @@ export type EditModalHandle = {
   close: () => void;
 } 
 
-//Modalの基本型
+//Modalの基本Props
 export interface EditModalProps {
   type: keyof ItemMap,
   onModalClose: () => void,
-  addItem: () => Promise<void>,
-  editItem: () => Promise<void>,
-  deleteItem: () => Promise<void>
+  addItem: (input: string[]) => Promise<void>,
+  editItem: (input: string[], id: number | null) => Promise<void>,
+  deleteItem: (id: number | null) => Promise<void>
 }
 
-//Modal内のConfigに対する型
+//Modal内のConfigに対するProps
 export interface ContentEditModalProps extends EditModalProps {
+  valueBefore: string[];
   inputValue: string[];
   setInputValue: (val: string[]) => void;
 }
 
-//ModalのRendererに対する型
+//ModalのRendererに対するProps
 export interface RendererEditModalProps extends EditModalProps {
+  valueBefore: string[];
   inputValue: string[];
   setInputValue: (val: string[]) => void;
   selectID: number | null;
