@@ -24,13 +24,13 @@ export const checklistConfig: EditConfig<ChecklistItem, ContentEditModalProps, C
         <div className="flex gap-2 justify-center">
           <button
             className="px-2 py-1 bg-teal-600 text-white rounded"
-            onClick={() => onModalOpen("update", item.id, item.item)}
+            onClick={() => onModalOpen("update", item.id, item.area_name, item.location, item.item)}
           >
             変更
           </button>
           <button
             className="px-2 py-1 bg-red-600 text-white rounded"
-            onClick={() => onModalOpen("delete", item.id, item.item)}
+            onClick={() => onModalOpen("delete", item.id, item.area_name, item.location, item.item)}
           >
             削除
           </button>
