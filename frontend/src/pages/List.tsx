@@ -9,7 +9,7 @@ import EditModal from "../components/EditModal";
 import { editConfig } from "../configs/EditConfig";
 import { ItemMap, EditConfig ,EditConfigKey, OnModalOpen, EditModalHandle } from "../configs/EditTypeConfig";
 
-export const API_URL = "http://localhost:3000/cleaning-edit";
+export const API_EDIT = "http://localhost:3000/cleaning-edit";
 
 type ListProps = {
   title: string;
@@ -44,7 +44,7 @@ const List = ({ title, setTitle }: ListProps) => {
 
   const fetchData =  async() => {
     try{
-      let url = `${API_URL}/${type}`;
+      let url = `${API_EDIT}/${type}`;
 
       //清掃箇所が指定された場合のみ（checklist）
       if(type === "checklist" && selectedSpotID !== ""){
@@ -106,7 +106,7 @@ const List = ({ title, setTitle }: ListProps) => {
 
   //CRUD
   const addItem = async(input: string[]) => {
-    await fetch(`${API_URL}/${type}`, {
+    await fetch(`${API_EDIT}/${type}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(getItemFormat(type, input)),
@@ -115,7 +115,7 @@ const List = ({ title, setTitle }: ListProps) => {
   };
 
   const editItem = async (input: string[], id: number | null) => {
-    await fetch(`${API_URL}/${type}/${id}`, {
+    await fetch(`${API_EDIT}/${type}/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(getItemFormat(type, input)),
@@ -124,7 +124,7 @@ const List = ({ title, setTitle }: ListProps) => {
   };
 
   const deleteItem = async (id: number | null) => {
-    await fetch(`${API_URL}/${type}/${id}`, {
+    await fetch(`${API_EDIT}/${type}/${id}`, {
       method: "DELETE",
     });
     await fetchData();
