@@ -20,14 +20,14 @@ export type OnModalOpen = (
 ) => void;
 
 //各typeにおけるModalを定義
-export type ModalRenderFunction<T, P extends EditModalProps = EditModalProps> = (props: P) => React.ReactNode;
+export type ModalRenderFunction<P extends EditModalProps = EditModalProps> = (props: P) => React.ReactNode;
 
 export type EditConfig<T, P extends EditModalProps = EditModalProps, HProps = {}> = {
   title: string;
   header: (onModalOpen: OnModalOpen, extraProps?: HProps) => React.ReactNode;
   row: (item: T, onModalOpen: OnModalOpen) => React.ReactNode;
   modals?: {
-    [key in LayoutType]? : ModalRenderFunction<T, P>
+    [key in LayoutType]? : ModalRenderFunction<P>
   };
 };
 
