@@ -47,7 +47,7 @@ export const ChecklistConfig: EditConfig<
     </>
   ),
   modals: {
-    add: (props) => (
+    add: (props: ContentEditModalProps) => (
       <div className="mt-12.5 mb-25 w-55">
         <p className="px-1 py-2 text-sm text-gray-700">追加項目</p>
         <div className="p-[2px] border rounded-lg border-gray-500">
@@ -87,7 +87,7 @@ export const ChecklistConfig: EditConfig<
         </div>
       </div>
     ),
-    update: (props) => (
+    update: (props: ContentEditModalProps) => (
       <div className="mt-7.5 mb-15 w-55">
         <div>
           <p className="py-2 text-xs text-gray-700">変更前</p>
@@ -155,7 +155,7 @@ export const ChecklistConfig: EditConfig<
         </div>
       </div>
     ),
-    delete: (props) => (
+    delete: (props: ContentEditModalProps) => (
       <div className="mt-12.5 mb-25 w-55">
         <p className="px-1 py-2 text-sm text-gray-700">削除項目</p>
         <div className="p-[2px] border rounded-lg border-gray-500">

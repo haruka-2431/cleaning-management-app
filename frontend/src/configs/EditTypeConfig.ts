@@ -48,7 +48,7 @@ export type EditConfig<
   header: (onModalOpen: OnModalOpen, extraProps?: HProps) => React.ReactNode;
   row: (item: T, onModalOpen: OnModalOpen) => React.ReactNode;
   modals?: {
-    [key in LayoutType]?: ModalRenderFunction<T, P>;
+    [key in LayoutType]?: ModalRenderFunction<P>;
   };
 };
 

@@ -1,4 +1,4 @@
-import { TabType } from "../pages/ReportList";
+import { TabType } from "../pages/Reportlist";
 
 interface NoReportsCardProps {
   activeTab: TabType;

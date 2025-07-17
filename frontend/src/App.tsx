@@ -13,7 +13,7 @@ import ManagerSelect from "./pages/ManagerSelect";
 import CleanSelect from "./pages/CleanSelect";
 import Checklist from "./pages/Checklist";
 
-import ReportList from "./pages/ReportList";
+import ReportList from "./pages/Reportlist";
 import CleaningEdit from "./pages/CleaningEdit";
 import List from "./pages/List";
 
