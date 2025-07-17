@@ -1,6 +1,6 @@
 import { EditConfig, ContentEditModalProps, ChecklistItem } from "../EditTypeConfig"
 import { ChecklistHeaderProps } from "../EditConfig";
-import { ChecklistSelects } from "../../components/CheckListSelects";
+import { ChecklistSelects } from "../../components/ChecklistSelects";
 
 export const checklistConfig: EditConfig<ChecklistItem, ContentEditModalProps, ChecklistHeaderProps> = {
   title: "チェックリスト",
