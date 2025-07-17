@@ -1,12 +1,17 @@
 import "./css/style.css";
 import { useState } from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import ManagerSelect from "./pages/ManagerSelect";
 import CleanSelect from "./pages/CleanSelect";
-import CheckList from "./pages/CheckList";
+import Checklist from "./pages/Checklist";
 
 import ReportList from "./pages/ReportList";
 import CleaningEdit from "./pages/CleaningEdit";
@@ -19,8 +24,8 @@ const App = () => {
     <AuthProvider>
       <Router>
         <Routes>
-          <Route path="/" element={<Navigate to="/manager-select" />}/>
-          <Route path="/manager-select" element={<ManagerSelect />}/>
+          <Route path="/" element={<Navigate to="/manager-select" />} />
+          <Route path="/manager-select" element={<ManagerSelect />} />
           <Route
             path="/worker"
             element={
@@ -30,15 +35,16 @@ const App = () => {
             }
           />
           <Route
-            path="/worker/checklist"
+            path="/worker/Checklist"
             element={
               <ProtectedRoute allowedRoles={["worker"]}>
-                <CheckList />
+                <Checklist />
               </ProtectedRoute>
             }
           />
           <Route
-            path="/admin" element={
+            path="/admin"
+            element={
               <ProtectedRoute allowedRoles={["admin"]}>
                 <ReportList />
               </ProtectedRoute>
@@ -48,7 +54,7 @@ const App = () => {
             path="/adimn/cleaning-edit"
             element={
               <ProtectedRoute allowedRoles={["admin"]}>
-                <CleaningEdit title={title} setTitle={setTitle}/>
+                <CleaningEdit title={title} setTitle={setTitle} />
               </ProtectedRoute>
             }
           />
@@ -56,7 +62,7 @@ const App = () => {
             path="/admin/cleaning-edit/:type"
             element={
               <ProtectedRoute allowedRoles={["admin"]}>
-                <List title={title} setTitle={setTitle}/>
+                <List title={title} setTitle={setTitle} />
               </ProtectedRoute>
             }
           />

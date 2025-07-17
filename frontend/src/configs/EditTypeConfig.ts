@@ -1,14 +1,29 @@
 //各タイプのリストデータ
-export type UserItem = { id: number; name: string; email: string; position: string; status: boolean };
+export type UserItem = {
+  id: number;
+  name: string;
+  email: string;
+  position: string;
+  status: boolean;
+};
 export type CleaningTypeItem = { id: number; type_name: string };
-export type CleaningAreaItem = { id: number; type_name: string; area_name: string };
-export type ChecklistItem = { id: number; area_name: string; location: string; item: string };
+export type CleaningAreaItem = {
+  id: number;
+  type_name: string;
+  area_name: string;
+};
+export type ChecklistItem = {
+  id: number;
+  area_name: string;
+  location: string;
+  item: string;
+};
 
 export type ItemMap = {
   user: UserItem;
   cleaning_type: CleaningTypeItem;
   cleaning_area: CleaningAreaItem;
-  checklist: ChecklistItem;
+  Checklist: ChecklistItem;
 };
 
 export type EditConfigKey = keyof ItemMap;
@@ -20,14 +35,20 @@ export type OnModalOpen = (
 ) => void;
 
 //各typeにおけるModalを定義
-export type ModalRenderFunction<T, P extends EditModalProps = EditModalProps> = (props: P) => React.ReactNode;
+export type ModalRenderFunction<P extends EditModalProps = EditModalProps> = (
+  props: P
+) => React.ReactNode;
 
-export type EditConfig<T, P extends EditModalProps = EditModalProps, HProps = {}> = {
+export type EditConfig<
+  T,
+  P extends EditModalProps = EditModalProps,
+  HProps = {},
+> = {
   title: string;
   header: (onModalOpen: OnModalOpen, extraProps?: HProps) => React.ReactNode;
   row: (item: T, onModalOpen: OnModalOpen) => React.ReactNode;
   modals?: {
-    [key in LayoutType]? : ModalRenderFunction<T, P>
+    [key in LayoutType]?: ModalRenderFunction<T, P>;
   };
 };
 
@@ -41,15 +62,15 @@ export type EditModalHandle = {
     layoutType: LayoutType;
   }) => void;
   close: () => void;
-} 
+};
 
 //Modalの基本Props
 export interface EditModalProps {
-  type: keyof ItemMap,
-  onModalClose: () => void,
-  addItem: (input: string[]) => Promise<void>,
-  editItem: (input: string[], id: number | null) => Promise<void>,
-  deleteItem: (id: number | null) => Promise<void>
+  type: keyof ItemMap;
+  onModalClose: () => void;
+  addItem: (input: string[]) => Promise<void>;
+  editItem: (input: string[], id: number | null) => Promise<void>;
+  deleteItem: (id: number | null) => Promise<void>;
 }
 
 //Modal内のConfigに対するProps

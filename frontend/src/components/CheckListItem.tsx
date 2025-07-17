@@ -11,7 +11,7 @@ interface ChecklistTemplates {
   [key: string]: ChecklistTemplate;
 }
 
-export const checklistTemplates: ChecklistTemplates = {
+export const ChecklistTemplates: ChecklistTemplates = {
   tenjin: {
     title: "民泊清掃 - 天神 -",
     data: {

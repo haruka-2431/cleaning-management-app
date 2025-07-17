@@ -4,8 +4,8 @@ import Header from "../components/Header";
 
 // 役割の型定義
 interface CleanSelectProps {
-  onGoToReportList?: () => void; 
-  userRole?: string; 
+  onGoToReportList?: () => void;
+  userRole?: string;
 }
 
 // 場所の選択肢の型定義
@@ -14,7 +14,7 @@ interface LocationOption {
   label: string;
 }
 
-const CleanSelect = ({  }: CleanSelectProps) => {
+const CleanSelect = ({}: CleanSelectProps) => {
   const nav = useNavigate();
 
   const [cleaningType, setCleaningType] = useState("");
@@ -64,8 +64,8 @@ const CleanSelect = ({  }: CleanSelectProps) => {
   const handleSubmit = () => {
     if (cleaningType && cleaningLocation) {
       //navigateによる実装
-      nav("/worker/checklist", {
-        state: { type: cleaningType, location: cleaningLocation }
+      nav("/worker/Checklist", {
+        state: { type: cleaningType, location: cleaningLocation },
       });
     } else {
       alert("すべての項目を選択してください");
@@ -77,10 +77,7 @@ const CleanSelect = ({  }: CleanSelectProps) => {
 
   return (
     <>
-      <Header
-        title="作業開始"
-        className="fixed top-0 left-0 right-0 z-50"
-      />
+      <Header title="作業開始" className="fixed top-0 left-0 right-0 z-50" />
       <div className="h-dvh flex items-center justify-center flex-col px-4 py-8">
         <div className="w-full max-w-80">
           <fieldset className="mx-auto flex flex-col items-center">
