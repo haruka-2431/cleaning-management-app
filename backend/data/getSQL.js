@@ -2,16 +2,20 @@ const user = require("./sql/user");
 const cleaning_type = require("./sql/cleaning_type");
 const cleaning_area = require("./sql/cleaning_area");
 const cleaning_spot = require("./sql/cleaning_spot");
-const Checklist = require("./sql/Checklist");
+const checklist = require("./sql/checklist");
 const cleaning_report = require("./sql/cleaning_report");
+const photo = require("./sql/photo");
+const location_time = require("./sql/location_time");
 
 const sqlMap = {
   user,
   cleaning_type,
   cleaning_area,
   cleaning_spot,
-  Checklist,
+  checklist,
   cleaning_report,
+  photo,
+  location_time,
 };
 
 module.exports = function getSQL(type, key) {
