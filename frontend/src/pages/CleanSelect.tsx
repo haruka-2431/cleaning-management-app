@@ -2,26 +2,66 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 
-// 役割の型定義
+export const MY_API_URL = "http://localhost:3000/my"; 
+
+// ← 型定義追加
 interface CleanSelectProps {
-  onGoToReportList?: () => void; 
-  userRole?: string; 
+  onGoToReportList?: () => void;
+  userRole?: string;
 }
 
-// 場所の選択肢の型定義
 interface LocationOption {
   value: string;
   label: string;
 }
 
-const CleanSelect = ({  }: CleanSelectProps) => {
+interface CleaningType {
+  id: number;
+  name: string;
+  areas: CleaningArea[];
+}
+
+interface CleaningArea {
+  id: number;
+  name: string;
+}
+
+interface ApiResponse {
+  types: CleaningType[];
+}
+
+const CleanSelect = ({}: CleanSelectProps) => {
   const nav = useNavigate();
 
   const [cleaningType, setCleaningType] = useState("");
   const [cleaningLocation, setCleaningLocation] = useState("");
+  const [locationOptions, setLocationOptions] = useState<LocationOption[]>([]);
 
-  // 清掃タイプに応じた場所の選択肢を定義
-  const getLocationOptions = (type: string): LocationOption[] => {
+  const fetchLocationOptions = async (typeName: string) => {
+    try {
+      const response = await fetch(`${MY_API_URL}/cleaning_area`);
+      const data: ApiResponse = await response.json(); 
+      
+      const targetType = data.types.find((type: CleaningType) => type.name === typeName); 
+      if (targetType) {
+        const options = targetType.areas.map((area: CleaningArea) => ({ 
+          value: area.name,
+          label: area.name
+        }));
+        setLocationOptions(options);
+      } else {
+        // フォールバック：静的データ
+        setLocationOptions(getStaticLocationOptions(typeName));
+      }
+    } catch (err) {
+      console.error("場所取得エラー:", err);
+      // フォールバック：静的データ
+      setLocationOptions(getStaticLocationOptions(typeName));
+    }
+  };
+
+  // ← フォールバック用の静的データ関数
+  const getStaticLocationOptions = (type: string): LocationOption[] => {
     switch (type) {
       case "巡回清掃":
         return [{ value: "選択なし", label: "選択なし" }];
@@ -45,27 +85,32 @@ const CleanSelect = ({  }: CleanSelectProps) => {
     }
   };
 
-  // 清掃タイプが変更されたときの処理
+  // ← 清掃タイプ変更時の処理（DB取得＋自動選択）
   useEffect(() => {
     if (cleaningType) {
-      const options = getLocationOptions(cleaningType);
-      if (options.length === 1) {
-        // 選択肢が1つしかない場合は自動で選択
-        setCleaningLocation(options[0].value);
-      } else {
-        // 選択肢が複数ある場合はリセット
-        setCleaningLocation("");
-      }
+      // DBから場所オプション取得
+      fetchLocationOptions(cleaningType);
     } else {
+      setLocationOptions([]);
       setCleaningLocation("");
     }
   }, [cleaningType]);
 
+  // ← 場所オプション取得後の自動選択処理
+  useEffect(() => {
+    if (locationOptions.length === 1) {
+      // 選択肢が1つしかない場合は自動で選択
+      setCleaningLocation(locationOptions[0].value);
+    } else if (locationOptions.length > 1) {
+      // 選択肢が複数ある場合はリセット
+      setCleaningLocation("");
+    }
+  }, [locationOptions]);
+
   const handleSubmit = () => {
     if (cleaningType && cleaningLocation) {
-      //navigateによる実装
-      nav("/worker/checklist", {
-        state: { type: cleaningType, location: cleaningLocation }
+      nav("/worker/Checklist", {
+        state: { type: cleaningType, location: cleaningLocation },
       });
     } else {
       alert("すべての項目を選択してください");
@@ -73,14 +118,10 @@ const CleanSelect = ({  }: CleanSelectProps) => {
   };
 
   const isFormValid = cleaningType && cleaningLocation;
-  const locationOptions = getLocationOptions(cleaningType);
 
   return (
     <>
-      <Header
-        title="作業開始"
-        className="fixed top-0 left-0 right-0 z-50"
-      />
+      <Header title="作業開始" className="fixed top-0 left-0 right-0 z-50" />
       <div className="h-dvh flex items-center justify-center flex-col px-4 py-8">
         <div className="w-full max-w-80">
           <fieldset className="mx-auto flex flex-col items-center">

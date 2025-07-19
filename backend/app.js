@@ -27,8 +27,12 @@ connection.connect((err) => {
 
 const editRouter = require("./routes/edit")(connection);
 
-app.use("/cleaning-edit", editRouter);　
-// 帆風さん
+app.use("/cleaning-edit", editRouter);
+// 帆風
+
+const myRouter = require("./routes/my")(connection);
+app.use("/my", myRouter);
+// 晴香
 
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);

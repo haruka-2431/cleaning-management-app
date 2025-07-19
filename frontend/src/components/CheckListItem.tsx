@@ -1,3 +1,5 @@
+export const MY_API_URL = "http://localhost:3000/my";
+
 // チェックリストテンプレートの型定義
 interface ChecklistTemplate {
   title: string;
@@ -6,12 +8,45 @@ interface ChecklistTemplate {
   };
 }
 
-// チェックリストテンプレート集合の型定義
-interface ChecklistTemplates {
-  [key: string]: ChecklistTemplate;
-}
+// DBからエリアID取得
+export const getAreaIdByName = async (typeName: string, areaName: string): Promise<number | null> => {
+  try {
+    const response = await fetch(`${MY_API_URL}/types-areas`);
+    const data = await response.json();
+    
+    const targetType = data.types.find((type: any) => type.name === typeName);
+    if (!targetType) return null;
+    
+    const targetArea = targetType.areas.find((area: any) => area.name === areaName);
+    return targetArea ? targetArea.id : null;
+  } catch (err) {
+    console.error("エリアID取得エラー:", err);
+    return null;
+  }
+};
 
-export const checklistTemplates: ChecklistTemplates = {
+//  DBからチェックリスト取得
+export const fetchChecklistTemplate = async (areaId: number): Promise<ChecklistTemplate> => {
+  try {
+    const response = await fetch(`${MY_API_URL}/checklist/select_by_area/${areaId}`);
+    const data = await response.json();
+    
+    // エリア名取得
+    const areaResponse = await fetch(`${MY_API_URL}/cleaning_area`);
+    const areas = await areaResponse.json();
+    const area = areas.find((a: any) => a.id === areaId);
+    
+    return {
+      title: area ? area.area_name : "チェックリスト",
+      data: data.data || {}
+    };
+  } catch (err) {
+    console.error("チェックリスト取得エラー:", err);
+    return { title: "エラー", data: {} };
+  }
+};
+
+export const ChecklistTemplates: { [key: string]: ChecklistTemplate } = {
   tenjin: {
     title: "民泊清掃 - 天神 -",
     data: {
@@ -291,20 +326,30 @@ export const checklistTemplates: ChecklistTemplates = {
   },
 };
 
-// 選択された清掃タイプと場所に基づいてテンプレートを決定する関数
-export const getTemplateByTypeAndLocation = (type: string, location: string): string | null => {
-  if (type === "民泊清掃") {
-    if (location === "天神民泊") return "tenjin";
-    if (location === "春吉民泊") return "harukichi";
+export const getTemplateByTypeAndLocation = async (type: string, location: string): Promise<string | ChecklistTemplate> => {
+  try {
+    // DBからエリアID取得
+    const areaId = await getAreaIdByName(type, location);
+    
+    if (areaId) {
+      // DBからチェックリスト取得
+      const template = await fetchChecklistTemplate(areaId);
+      return template;
+    } else {
+      // フォールバック：静的データ使用
+      if (type === "民泊清掃") {
+        if (location === "天神民泊") return "tenjin";
+        if (location === "春吉民泊") return "harukichi";
+      }
+      if (type === "巡回清掃") return "junkai";
+      if (type === "施設清掃") return "shisetsu";
+      if (type === "ハウスクリーニング") return "house";
+      
+      return "tenjin"; // デフォルト
+    }
+  } catch (err) {
+    console.error("テンプレート取得エラー:", err);
+    // エラー時は静的データにフォールバック
+    return "tenjin";
   }
-  if (type === "巡回清掃") {
-    return "junkai"; // 巡回清掃用の特別なテンプレート
-  }
-  if (type === "施設清掃") {
-    return "shisetsu";
-  }
-  if (type === "ハウスクリーニング") {
-    return "house";
-  }
-  return null;
 };
