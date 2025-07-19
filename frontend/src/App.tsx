@@ -13,7 +13,7 @@ import ManagerSelect from "./pages/ManagerSelect";
 import CleanSelect from "./pages/CleanSelect";
 import Checklist from "./pages/Checklist";
 
-import ReportList from "./pages/Reportlist";
+import Reportlist from "./pages/Reportlist";
 import CleaningEdit from "./pages/CleaningEdit";
 import List from "./pages/List";
 
@@ -46,12 +46,12 @@ const App = () => {
             path="/admin"
             element={
               <ProtectedRoute allowedRoles={["admin"]}>
-                <ReportList />
+                <Reportlist />
               </ProtectedRoute>
             }
           />
           <Route
-            path="/adimn/cleaning-edit"
+            path="/admin/cleaning-edit"
             element={
               <ProtectedRoute allowedRoles={["admin"]}>
                 <CleaningEdit title={title} setTitle={setTitle} />

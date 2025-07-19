@@ -1,9 +1,11 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import Header from "../components/Header";
 import { useNavigate } from "react-router-dom";
 import ReportTable from "../components/ReportTable";
 import ReportDetailModal from "../components/ReportDetailModal";
 import NoReportsCard from "../components/NoReportCard";
+
+export const MY_API_URL = "http://localhost:3000/my"; 
 
 // レポートデータの型定義
 export interface Report {
@@ -20,150 +22,25 @@ export interface Report {
 // タブの型定義
 export type TabType = "unconfirmed" | "confirmed";
 
-const reportData: Report[] = [
-  {
-    id: 1,
-    user: "田中太郎",
-    subUser: "佐藤花子",
-    type: "民泊清掃",
-    area: "天神民泊",
-    startDatetime: "2024-01-15 09:00",
-    endDatetime: "2024-01-15 12:30",
-    status: false,
-  },
-  {
-    id: 2,
-    user: "山田次郎",
-    subUser: "-",
-    type: "施設清掃",
-    area: "",
-    startDatetime: "2024-01-15 14:00",
-    endDatetime: "2024-01-15 17:00",
-    status: false,
-  },
-  {
-    id: 3,
-    user: "鈴木美咲",
-    subUser: "高橋健太",
-    type: "ハウスクリーニング",
-    area: "-",
-    startDatetime: "2024-01-14 10:00",
-    endDatetime: "2024-01-14 15:30",
-    status: true,
-  },
-  {
-    id: 4,
-    user: "佐藤花子",
-    subUser: "-",
-    type: "巡回清掃",
-    area: "ゆうはな",
-    startDatetime: "2024-01-14 08:00",
-    endDatetime: "2024-01-14 10:00",
-    status: true,
-  },
-  {
-    id: 5,
-    user: "高橋健太",
-    subUser: "田中太郎",
-    type: "民泊清掃",
-    area: "春吉民泊",
-    startDatetime: "2024-01-13 11:00",
-    endDatetime: "2024-01-13 14:30",
-    status: false,
-  },
-  {
-    id: 6,
-    user: "田中太郎",
-    subUser: "-",
-    type: "施設清掃",
-    area: "ゆうはな",
-    startDatetime: "2024-01-13 15:00",
-    endDatetime: "2024-01-13 18:00",
-    status: true,
-  },
-  {
-    id: 7,
-    user: "田中太郎",
-    subUser: "-",
-    type: "施設清掃",
-    area: "ゆうはな",
-    startDatetime: "2024-01-13 15:00",
-    endDatetime: "2024-01-13 18:00",
-    status: true,
-  },
-  {
-    id: 8,
-    user: "田中太郎",
-    subUser: "-",
-    type: "施設清掃",
-    area: "ゆうはな",
-    startDatetime: "2024-01-13 15:00",
-    endDatetime: "2024-01-13 18:00",
-    status: true,
-  },
-  {
-    id: 9,
-    user: "田中太郎",
-    subUser: "-",
-    type: "施設清掃",
-    area: "ゆうはな",
-    startDatetime: "2024-01-13 15:00",
-    endDatetime: "2024-01-13 18:00",
-    status: true,
-  },
-  {
-    id: 10,
-    user: "田中太郎",
-    subUser: "-",
-    type: "施設清掃",
-    area: "",
-    startDatetime: "2024-01-13 15:00",
-    endDatetime: "2024-01-13 18:00",
-    status: true,
-  },
-  {
-    id: 11,
-    user: "田中太郎",
-    subUser: "-",
-    type: "施設清掃",
-    area: "ゆうはな",
-    startDatetime: "2024-01-13 15:00",
-    endDatetime: "2024-01-13 18:00",
-    status: true,
-  },
-  {
-    id: 12,
-    user: "田中太郎",
-    subUser: "-",
-    type: "施設清掃",
-    area: "ゆうはな",
-    startDatetime: "2024-01-13 15:00",
-    endDatetime: "2024-01-13 18:00",
-    status: true,
-  },
-  {
-    id: 13,
-    user: "田中太郎",
-    subUser: "-",
-    type: "施設清掃",
-    area: "ゆうはな",
-    startDatetime: "2024-01-13 15:00",
-    endDatetime: "2024-01-13 18:00",
-    status: true,
-  },
-  {
-    id: 14,
-    user: "田中太郎",
-    subUser: "-",
-    type: "施設清掃",
-    area: "ゆうはな",
-    startDatetime: "2024-01-13 15:00",
-    endDatetime: "2024-01-13 18:00",
-    status: true,
-  },
-];
+const [reportData, setReportData] = useState<Report[]>([]);
 
-const ReportList = () => {
+useEffect(() => {
+  const fetchReports = async () => {
+    try {
+      const response = await fetch(`${MY_API_URL}/reports`);
+      const data = await response.json();
+      setReportData(data.reports);
+    } catch (err) {
+      console.error("レポート取得エラー:", err);
+      setReportData([]);
+    }
+  };
+  
+  fetchReports();
+}, []);
+
+
+const Reportlist = () => {
   const nav = useNavigate();
   const [activeTab, setActiveTab] = useState<TabType>("unconfirmed");
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
@@ -268,4 +145,4 @@ const ReportList = () => {
   );
 };
 
-export default ReportList;
+export default Reportlist;

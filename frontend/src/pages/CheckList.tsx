@@ -7,7 +7,7 @@ import ChecklistSection from "../components/ChecklistSection";
 import ReportModal from "../components/ReportModal";
 import CompletedScreen from "../components/CompletedScreen";
 
-export const MY_API_URL = "http://localhost:3000/my"; // ← API URL追加
+export const MY_API_URL = "http://localhost:3000/my";
 
 interface CheckedItems {
   [key: string]: boolean;
@@ -26,25 +26,61 @@ const ChecklistScreen = () => {
   const cleaningData = location.state;
 
   const [selectedTemplate, setSelectedTemplate] = useState<string>("");
+  const [currentChecklist, setCurrentChecklist] = useState<ChecklistTemplate | undefined>(undefined); // ← 追加
   const [checkedItems, setCheckedItems] = useState<CheckedItems>({});
   const [reportModalOpen, setReportModalOpen] = useState<boolean>(false);
   const [uploadedPhotos, setUploadedPhotos] = useState<File[]>([]);
   const [completed, setCompleted] = useState<boolean>(false);
   const [selectedPersonInCharge, setSelectedPersonInCharge] = useState<string>("追加者なし");
+  const [loading, setLoading] = useState<boolean>(false); // ← 追加
   
-  // ← バックエンド関連の状態（裏で動作）
-  const [currentReportId] = useState<number>(1); // 固定値または動的に設定
+  // 作業時間記録用の状態
+  const [workStartTime, setWorkStartTime] = useState<Date | null>(null);
+  const [currentReportId] = useState<number>(1);
   
+  // ← 非同期でテンプレート取得
   useEffect(() => {
-    if (cleaningData && cleaningData.type && cleaningData.location) {
-      const template = getTemplateByTypeAndLocation(cleaningData.type, cleaningData.location);
-      if (template) {
-        setSelectedTemplate(template);
+    const loadTemplate = async () => {
+      if (cleaningData && cleaningData.type && cleaningData.location) {
+        setLoading(true);
+        try {
+          const template = await getTemplateByTypeAndLocation(
+            cleaningData.type,
+            cleaningData.location
+          );
+          
+          if (typeof template === 'string') {
+            // 静的テンプレートの場合
+            setSelectedTemplate(template);
+            setCurrentChecklist(ChecklistTemplates[template]);
+          } else {
+            // DBから取得したテンプレートの場合
+            setSelectedTemplate('db-template');
+            setCurrentChecklist(template);
+          }
+        } catch (err) {
+          console.error("テンプレート取得エラー:", err);
+          // フォールバック：デフォルトテンプレート
+          setSelectedTemplate('tenjin');
+          setCurrentChecklist(ChecklistTemplates['tenjin']);
+        } finally {
+          setLoading(false);
+        }
       }
-    }
+    };
+    
+    loadTemplate();
   }, [cleaningData]);
 
-  // ← バックエンドAPI関数（裏で動作）
+  // 作業開始時刻を記録（ページ読み込み時）
+  useEffect(() => {
+    if (!workStartTime) {
+      setWorkStartTime(new Date());
+      console.log("作業開始時刻を記録しました:", new Date().toLocaleTimeString());
+    }
+  }, []);
+
+  // バックエンドAPI関数
   const savePhotoToDb = async (photoUrl: string) => {
     try {
       await fetch(`${MY_API_URL}/photo`, {
@@ -81,21 +117,15 @@ const ChecklistScreen = () => {
 
   const saveChecklistToDb = async (checkedItems: CheckedItems) => {
     try {
-      // チェックされた項目をDBに保存する処理
       const checkedList = Object.entries(checkedItems)
         .filter(([key, checked]) => checked)
         .map(([key]) => key);
       
       console.log("チェック状態をDBに保存しました:", checkedList);
-      // 実際のDB保存処理はここに実装
     } catch (err) {
       console.error("チェックリスト保存エラー:", err);
     }
   };
-
-  const currentChecklist: ChecklistTemplate | undefined = selectedTemplate
-    ? (ChecklistTemplates as any)[selectedTemplate]
-    : undefined;
 
   const toggleCheck = (section: string, item: string) => {
     const key = `${selectedTemplate}-${section}-${item}`;
@@ -110,23 +140,29 @@ const ChecklistScreen = () => {
   };
 
   const submitReport = async () => {
-    // ← 報告書送信時にバックエンドにデータ保存
     try {
       // チェック状態を保存
       await saveChecklistToDb(checkedItems);
       
-      // 写真がある場合は保存（例：ダミーURL）
+      // 写真がある場合は保存
       if (uploadedPhotos.length > 0) {
-        // 実際のファイルアップロード処理後にURLを取得
         const dummyPhotoUrl = "https://example.com/photo.jpg";
         await savePhotoToDb(dummyPhotoUrl);
       }
       
-      // 作業時間を保存（例：現在時刻ベース）
-      const startTime = new Date();
-      const endTime = new Date(startTime.getTime() + 30 * 60000); // 30分後
-      const requiredTime = `${endTime.getHours().toString().padStart(2, '0')}:${endTime.getMinutes().toString().padStart(2, '0')}:00`;
-      await saveLocationTimeToDb(selectedTemplate || "清掃作業", requiredTime);
+      // 実際の作業時間を計算して保存
+      if (workStartTime) {
+        const workEndTime = new Date();
+        const workDurationMs = workEndTime.getTime() - workStartTime.getTime();
+        const workDurationMinutes = Math.floor(workDurationMs / 60000);
+        const hours = Math.floor(workDurationMinutes / 60);
+        const minutes = workDurationMinutes % 60;
+        
+        const requiredTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:00`;
+        
+        console.log(`実際の作業時間: ${hours}時間${minutes}分 (${requiredTime})`);
+        await saveLocationTimeToDb(currentChecklist?.title || "清掃作業", requiredTime);
+      }
       
       console.log("報告書データをすべてDBに保存しました");
     } catch (err) {
@@ -139,6 +175,20 @@ const ChecklistScreen = () => {
 
   if (completed) {
     return <CompletedScreen nav={nav} />;
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Header title="チェックリスト・報告書" />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-800 mx-auto mb-4"></div>
+            <p className="text-gray-600">チェックリストを読み込み中...</p>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -154,6 +204,11 @@ const ChecklistScreen = () => {
         <p className="text-sm opacity-90">
           {cleaningData?.type === "巡回清掃" ? "" : "チェックリスト"}
         </p>
+        {workStartTime && (
+          <p className="text-xs opacity-75 mt-1">
+            作業開始: {workStartTime.toLocaleTimeString()}
+          </p>
+        )}
       </div>
 
       <div className="relative flex-1 overflow-y-auto mb-28">
@@ -165,13 +220,12 @@ const ChecklistScreen = () => {
           </div>
         ) : (
           <div className="p-4 space-y-6">
-            {/* 既存のチェックリスト */}
             {currentChecklist &&
               Object.entries(currentChecklist.data).map(([section, items]) => (
                 <ChecklistSection
                   key={section}
                   section={section}
-                  items={items as string[]}
+                  items={items}
                   checkedItems={checkedItems}
                   selectedTemplate={selectedTemplate}
                   onToggleCheck={toggleCheck}

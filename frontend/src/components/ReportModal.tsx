@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   XMarkIcon,
   ArrowUpTrayIcon,
@@ -17,13 +17,34 @@ interface ReportModalProps {
   setSelectedPersonInCharge: React.Dispatch<React.SetStateAction<string>>;
 }
 
-const registeredUsers: string[] = [
-  "田中太郎",
-  "佐藤花子",
-  "山田次郎",
-  "鈴木美咲",
-  "高橋健太",
-];
+export const MY_API_URL = "http://localhost:3000/my"; 
+
+interface User {
+  id: number;
+  name: string;
+  email: string;
+  position: string;
+}
+
+const [registeredUsers, setRegisteredUsers] = useState<string[]>([]);
+
+useEffect(() => {
+  const fetchUsers = async () => {
+    try {
+      const response = await fetch(`${MY_API_URL}/users/active`);
+      const data = await response.json();
+      const userNames = data.users.map((user: User) => user.name);
+      setRegisteredUsers(userNames);
+    } catch (err) {
+      console.error("ユーザー取得エラー:", err);
+      // フォールバック用静的データ
+      setRegisteredUsers(["田中太郎", "佐藤花子", "山田次郎"]);
+    }
+  };
+  
+  fetchUsers();
+}, []);
+
 const personOptions: string[] = ["追加者なし", ...registeredUsers];
 
 const ReportModal = ({
