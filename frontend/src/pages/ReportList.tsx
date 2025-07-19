@@ -5,7 +5,7 @@ import ReportTable from "../components/ReportTable";
 import ReportDetailModal from "../components/ReportDetailModal";
 import NoReportsCard from "../components/NoReportCard";
 
-export const MY_API_URL = "http://localhost:3000/my"; 
+export const MY_API_URL = "http://localhost:3000/my";
 
 // レポートデータの型定義
 export interface Report {
@@ -22,32 +22,108 @@ export interface Report {
 // タブの型定義
 export type TabType = "unconfirmed" | "confirmed";
 
-const Reportlist = () => {
-  const [reportData, setReportData] = useState<Report[]>([]); 
-
-  useEffect(() => { 
-    const fetchReports = async () => {
-      try {
-        const response = await fetch(`${MY_API_URL}/clean_report`);
-        const data = await response.json();
-        setReportData(data.reports);
-      } catch (err) {
-        console.error("レポート取得エラー:", err);
-        setReportData([]);
-      }
-    };
-    
-    fetchReports();
-  }, []); 
-
+const ReportList = () => {
   const nav = useNavigate();
   const [activeTab, setActiveTab] = useState<TabType>("unconfirmed");
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
+  const [reportData, setReportData] = useState<Report[]>([]); // ← 初期値を空配列に
+  const [loading, setLoading] = useState<boolean>(false);
 
-  // レポートをフィルタリング
-  const filteredReports = reportData.filter((report) =>
+  // ← DBからレポートデータ取得
+  const fetchReports = async () => {
+    setLoading(true);
+    try {
+      console.log("レポート取得開始:", `${MY_API_URL}/cleaning_report`);
+      
+      const response = await fetch(`${MY_API_URL}/cleaning_report`);
+      console.log("レスポンス状態:", response.status);
+      
+      const data = await response.json();
+      console.log("取得レポートデータ:", data);
+      
+      // レスポンス形式を確認して適切に処理
+      if (Array.isArray(data)) {
+        // データ形式を変換（DBの形式 → アプリの形式）
+        const formattedReports: Report[] = data.map((item: any) => ({
+          id: item.id || Math.random(),
+          user: item.user_name || item.user || "不明",
+          subUser: item.sub_user_name || item.subUser || undefined,
+          type: item.cleaning_type || item.type || "不明",
+          area: item.cleaning_area || item.area || "不明",
+          startDatetime: item.start_datetime || item.startDatetime || "不明",
+          endDatetime: item.end_datetime || item.endDatetime || "不明",
+          status: item.is_confirmed || item.status || false,
+        }));
+        
+        setReportData(formattedReports);
+      } else {
+        console.error("不正なレポートデータ形式:", data);
+        setReportData(getStaticReportData()); // フォールバック
+      }
+      
+    } catch (err) {
+      console.error("レポート取得エラー:", err);
+      setReportData(getStaticReportData()); // エラー時はフォールバック
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ← フォールバック用の静的データ
+  const getStaticReportData = (): Report[] => {
+    return [
+      {
+        id: 1,
+        user: "山田太郎",
+        subUser: "相沢佳奈",
+        type: "民泊清掃",
+        area: "天神民泊",
+        startDatetime: "2024-01-15 09:00",
+        endDatetime: "2024-01-15 12:30",
+        status: false,
+      },
+      {
+        id: 2,
+        user: "佐藤佳次",
+        subUser: undefined,
+        type: "施設清掃",
+        area: "サンホームさくら本館",
+        startDatetime: "2024-01-15 14:00",
+        endDatetime: "2024-01-15 17:00",
+        status: false,
+      },
+      {
+        id: 3,
+        user: "岡崎かなた",
+        subUser: "山田太郎",
+        type: "ハウスクリーニング",
+        area: "選択なし",
+        startDatetime: "2024-01-14 10:00",
+        endDatetime: "2024-01-14 15:30",
+        status: true,
+      },
+      {
+        id: 4,
+        user: "相沢佳奈",
+        subUser: undefined,
+        type: "巡回清掃",
+        area: "選択なし",
+        startDatetime: "2024-01-14 08:00",
+        endDatetime: "2024-01-14 10:00",
+        status: true,
+      },
+    ];
+  };
+
+  // ← 初回読み込み時にデータ取得
+  useEffect(() => {
+    fetchReports();
+  }, []);
+
+  // レポートをフィルタリング（安全な処理）
+  const filteredReports = reportData?.filter((report) =>
     activeTab === "unconfirmed" ? !report.status : report.status
-  );
+  ) || []; // ← reportDataがundefinedの場合は空配列
 
   // モーダル開閉のハンドラ
   const openDetailModal = useCallback((report: Report) => {
@@ -102,7 +178,15 @@ const Reportlist = () => {
           </button>
         </div>
         
-        {filteredReports.length > 0 ? (
+        {/* ← ローディング表示 */}
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-800 mx-auto mb-4"></div>
+              <p className="text-gray-600">レポートを読み込み中...</p>
+            </div>
+          </div>
+        ) : filteredReports.length > 0 ? (
           <ReportTable reports={filteredReports} onOpenDetail={openDetailModal} />
         ) : (
           <NoReportsCard activeTab={activeTab} />
@@ -110,8 +194,10 @@ const Reportlist = () => {
       </div>
 
       <div className="fixed bottom-0 left-0 right-0 px-4 py-8 z-10 bg-white">
-        <button className="btn bg-cyan-800 text-white w-full gap-2 shadow-lg h-14"
-        onClick={() => nav("/admin/cleaning-edit")}>
+        <button 
+          className="btn bg-cyan-800 text-white w-full gap-2 shadow-lg h-14"
+          onClick={() => nav("/admin/cleaning-edit")}
+        >
           データの編集
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -144,4 +230,4 @@ const Reportlist = () => {
   );
 };
 
-export default Reportlist;
+export default ReportList;

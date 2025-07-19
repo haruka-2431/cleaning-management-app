@@ -7,6 +7,17 @@ import {
 } from "@heroicons/react/24/outline";
 import PhotoModal from "./PhotoModal";
 
+export const MY_API_URL = "http://localhost:3000/my";
+
+// 型定義
+interface User {
+  id: number;
+  name: string;
+  email: string;
+  position: string;
+  status: number;
+}
+
 interface ReportModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -17,16 +28,7 @@ interface ReportModalProps {
   setSelectedPersonInCharge: React.Dispatch<React.SetStateAction<string>>;
 }
 
-export const MY_API_URL = "http://localhost:3000/my"; 
-
-interface User {
-  id: number;
-  name: string;
-  email: string;
-  position: string;
-}
-
-const ReportModal = ({ 
+const ReportModal = ({
   isOpen,
   onClose,
   onSubmit,
@@ -35,28 +37,50 @@ const ReportModal = ({
   selectedPersonInCharge,
   setSelectedPersonInCharge,
 }: ReportModalProps) => {
-  const [registeredUsers, setRegisteredUsers] = useState<string[]>([]);
   const [isPersonDropdownOpen, setPersonDropdownOpen] = useState<boolean>(false);
   const [showPhotoModal, setShowPhotoModal] = useState<boolean>(false);
+  const [registeredUsers, setRegisteredUsers] = useState<string[]>([]);
 
+  // ユーザー一覧取得（修正版）
   useEffect(() => {
     const fetchUsers = async () => {
       try {
+        console.log("ユーザー取得開始:", `${MY_API_URL}/user`);
+        
         const response = await fetch(`${MY_API_URL}/user`);
-        const data = await response.json();
-        const userNames = data.users.map((user: User) => user.name);
+        console.log("ユーザーレスポンス状態:", response.status);
+        
+        const data: User[] = await response.json();
+        console.log("取得ユーザーデータ:", data);
+        
+        // 配列を直接処理
+        if (!data || !Array.isArray(data)) {
+          console.error("不正なユーザーデータ形式:", data);
+          // フォールバック用静的データ
+          setRegisteredUsers(["山田太郎", "相沢佳奈", "佐藤佳次", "岡崎かなた"]);
+          return;
+        }
+        
+        // status=1（アクティブ）のユーザーのみ取得
+        const activeUsers = data.filter((user: User) => user.status === 1);
+        const userNames = activeUsers.map((user: User) => user.name);
+        
+        console.log("アクティブユーザー:", userNames);
         setRegisteredUsers(userNames);
+        
       } catch (err) {
         console.error("ユーザー取得エラー:", err);
         // フォールバック用静的データ
-        setRegisteredUsers(["田中太郎", "佐藤花子", "山田次郎"]);
+        setRegisteredUsers(["山田太郎", "相沢佳奈", "佐藤佳次", "岡崎かなた"]);
       }
     };
     
-    fetchUsers();
-  }, []);
+    if (isOpen) {
+      fetchUsers();
+    }
+  }, [isOpen]);
 
-  const personOptions: string[] = ["追加者なし", ...registeredUsers]; 
+  const personOptions: string[] = ["追加者なし", ...registeredUsers];
 
   const handlePhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
