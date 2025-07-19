@@ -60,7 +60,7 @@ export const cleaningTypeConfig: EditConfig<CleaningTypeItem, ContentEditModalPr
         <div>
           <p className="py-2 text-xs text-gray-700">変更前</p>
           <p className="w-full px-3 py-1.5 border rounded-lg border-gray-300 text-sm text-slate-800">
-            {props.inputValue}
+            {props.valueBefore[0]}
           </p>
         </div>
         <div className="mt-6 mb-1 flex justify-center text-black">

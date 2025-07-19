@@ -27,7 +27,8 @@ connection.connect((err) => {
 
 const editRouter = require("./routes/edit")(connection);
 
-app.use("/cleaning-edit", editRouter);
+app.use("/cleaning-edit", editRouter);　
+// 帆風さん
 
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
