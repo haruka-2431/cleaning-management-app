@@ -8,15 +8,15 @@ import { useNavigate } from 'react-router-dom';
 
 // マネージャーロール選択型定義
 interface ManagerSelectProps {
-  onLogout?: (() => void) | null; // バックエンド実装時に使用
-  userName?: string | null; // バックエンド実装時に使用
-  userPermissions?: string[] | null; // バックエンド実装時に使用
+  onLogout?: (() => void) | null; 
+  userName?: string | null; 
+  userPermissions?: string[] | null;
 }
 
 const ManagerSelect = ({
-  onLogout = null, // バックエンド実装時に使用
-  userName = null, // バックエンド実装時に使用
-  userPermissions: _userPermissions = [] // バックエンド実装時に使用（_で未使用を明示）
+  onLogout = null, 
+  userName = null, 
+  userPermissions: _userPermissions = [] 
 }: ManagerSelectProps) => {
   const nav = useNavigate();
 

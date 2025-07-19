@@ -26,28 +26,7 @@ interface User {
   position: string;
 }
 
-const [registeredUsers, setRegisteredUsers] = useState<string[]>([]);
-
-useEffect(() => {
-  const fetchUsers = async () => {
-    try {
-      const response = await fetch(`${MY_API_URL}/users/active`);
-      const data = await response.json();
-      const userNames = data.users.map((user: User) => user.name);
-      setRegisteredUsers(userNames);
-    } catch (err) {
-      console.error("ユーザー取得エラー:", err);
-      // フォールバック用静的データ
-      setRegisteredUsers(["田中太郎", "佐藤花子", "山田次郎"]);
-    }
-  };
-  
-  fetchUsers();
-}, []);
-
-const personOptions: string[] = ["追加者なし", ...registeredUsers];
-
-const ReportModal = ({
+const ReportModal = ({ 
   isOpen,
   onClose,
   onSubmit,
@@ -56,9 +35,28 @@ const ReportModal = ({
   selectedPersonInCharge,
   setSelectedPersonInCharge,
 }: ReportModalProps) => {
-  const [isPersonDropdownOpen, setPersonDropdownOpen] =
-    useState<boolean>(false);
+  const [registeredUsers, setRegisteredUsers] = useState<string[]>([]);
+  const [isPersonDropdownOpen, setPersonDropdownOpen] = useState<boolean>(false);
   const [showPhotoModal, setShowPhotoModal] = useState<boolean>(false);
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await fetch(`${MY_API_URL}/user`);
+        const data = await response.json();
+        const userNames = data.users.map((user: User) => user.name);
+        setRegisteredUsers(userNames);
+      } catch (err) {
+        console.error("ユーザー取得エラー:", err);
+        // フォールバック用静的データ
+        setRegisteredUsers(["田中太郎", "佐藤花子", "山田次郎"]);
+      }
+    };
+    
+    fetchUsers();
+  }, []);
+
+  const personOptions: string[] = ["追加者なし", ...registeredUsers]; 
 
   const handlePhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);

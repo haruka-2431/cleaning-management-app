@@ -20,25 +20,44 @@ interface ChecklistTemplate {
   };
 }
 
-const ChecklistScreen = () => {
+// 報告書を保存するためのデータ型定義
+interface NewReportData {
+  user: string;
+  subUser?: string;
+  type: string;
+  area: string;
+  startDatetime: string;
+  endDatetime: string;
+  status: boolean;
+}
+
+const Checklist = () => {
   const nav = useNavigate();
   const location = useLocation();
-  const cleaningData = location.state;
+  const cleaningData = location.state as {
+    user: string;
+    type: string;
+    location: string;
+  };
+
+   console.log("cleaningData:", cleaningData); // これを追加！
+  console.log("cleaningData.user:", cleaningData?.user); // これも追加！
+  console.log("cleaningData.type:", cleaningData?.type); // これも追加！
+  console.log("cleaningData.location:", cleaningData?.location); // これも追加！
 
   const [selectedTemplate, setSelectedTemplate] = useState<string>("");
-  const [currentChecklist, setCurrentChecklist] = useState<ChecklistTemplate | undefined>(undefined); // ← 追加
+  const [currentChecklist, setCurrentChecklist] = useState<ChecklistTemplate | undefined>(undefined);
   const [checkedItems, setCheckedItems] = useState<CheckedItems>({});
   const [reportModalOpen, setReportModalOpen] = useState<boolean>(false);
   const [uploadedPhotos, setUploadedPhotos] = useState<File[]>([]);
   const [completed, setCompleted] = useState<boolean>(false);
   const [selectedPersonInCharge, setSelectedPersonInCharge] = useState<string>("追加者なし");
-  const [loading, setLoading] = useState<boolean>(false); // ← 追加
-  
+  const [loading, setLoading] = useState<boolean>(false);
+
   // 作業時間記録用の状態
   const [workStartTime, setWorkStartTime] = useState<Date | null>(null);
-  const [currentReportId] = useState<number>(1);
-  
-  // ← 非同期でテンプレート取得
+
+  // 非同期でテンプレート取得
   useEffect(() => {
     const loadTemplate = async () => {
       if (cleaningData && cleaningData.type && cleaningData.location) {
@@ -48,19 +67,16 @@ const ChecklistScreen = () => {
             cleaningData.type,
             cleaningData.location
           );
-          
+
           if (typeof template === 'string') {
-            // 静的テンプレートの場合
             setSelectedTemplate(template);
             setCurrentChecklist(ChecklistTemplates[template]);
           } else {
-            // DBから取得したテンプレートの場合
             setSelectedTemplate('db-template');
             setCurrentChecklist(template);
           }
         } catch (err) {
           console.error("テンプレート取得エラー:", err);
-          // フォールバック：デフォルトテンプレート
           setSelectedTemplate('tenjin');
           setCurrentChecklist(ChecklistTemplates['tenjin']);
         } finally {
@@ -68,7 +84,6 @@ const ChecklistScreen = () => {
         }
       }
     };
-    
     loadTemplate();
   }, [cleaningData]);
 
@@ -78,52 +93,135 @@ const ChecklistScreen = () => {
       setWorkStartTime(new Date());
       console.log("作業開始時刻を記録しました:", new Date().toLocaleTimeString());
     }
-  }, []);
+  }, [workStartTime]); 
 
-  // バックエンドAPI関数
-  const savePhotoToDb = async (photoUrl: string) => {
+
+  // 報告書基本情報をDBに保存する関数
+  const saveReportToDb = async (reportData: NewReportData): Promise<number> => {
+    try {
+      const response = await fetch(`${MY_API_URL}/clean_report`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(reportData),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`サーバーエラー: ${response.status} - ${errorText}`);
+      }
+
+      const result = await response.json();
+      console.log('報告書をDBに保存しました (基本情報):', result);
+      return result.id;
+    } catch (error) {
+      console.error('報告書の基本情報保存エラー:', error);
+      throw error; 
+    }
+  };
+
+  // 写真をDBに保存する関数
+  const savePhotoToDb = async (photoUrl: string, reportId: number) => {
     try {
       await fetch(`${MY_API_URL}/photo`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          report_id: currentReportId,
+          report_id: reportId, 
           photo_url: photoUrl,
           posted_datetime: new Date().toISOString().slice(0, 19).replace('T', ' '),
         }),
       });
-      console.log("写真をDBに保存しました:", photoUrl);
+      console.log("写真をDBに保存しました:", photoUrl, "レポートID:", reportId);
     } catch (err) {
       console.error("写真保存エラー:", err);
     }
   };
 
-  const saveLocationTimeToDb = async (taskName: string, requiredTime: string) => {
+  // 所要時間をDBに保存する関数
+  const saveLocationTimeToDb = async (reportId: number, taskName: string, requiredTime: string) => {
     try {
       await fetch(`${MY_API_URL}/location_time`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          report_id: currentReportId,
+          report_id: reportId, 
           task_name: taskName,
           required_time: requiredTime,
         }),
       });
-      console.log("所要時間をDBに保存しました:", taskName, requiredTime);
+      console.log("所要時間をDBに保存しました:", taskName, requiredTime, "レポートID:", reportId);
     } catch (err) {
       console.error("所要時間保存エラー:", err);
     }
   };
 
-  const saveChecklistToDb = async (checkedItems: CheckedItems) => {
+  const saveChecklistToDb = async (reportId: number, checkedItems: CheckedItems) => {
     try {
       const checkedList = Object.entries(checkedItems)
-        .filter(([key, checked]) => checked)
-        .map(([key]) => key);
-      
-      console.log("チェック状態をDBに保存しました:", checkedList);
+        .filter(([_, checked]) => checked)
+        .map(([key]) => key); 
+
+      await fetch(`${MY_API_URL}/checklist`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ report_id: reportId, items: checkedList }),
+      });
+      console.log("チェック状態をDBに保存しました:", checkedList, "レポートID:", reportId);
     } catch (err) {
       console.error("チェックリスト保存エラー:", err);
+    }
+  };
+
+  // 報告書提出時のメイン処理
+  const submitReport = async () => {
+    try {
+      if (!cleaningData || !cleaningData.user || !cleaningData.type || !cleaningData.location) {
+        throw new Error("レポートに必要なデータが不足しています。");
+      }
+
+      const reportToSave: NewReportData = {
+        user: cleaningData.user,
+        subUser: selectedPersonInCharge === "追加者なし" ? undefined : selectedPersonInCharge,
+        type: cleaningData.type,
+        area: cleaningData.location,
+        startDatetime: workStartTime ? workStartTime.toISOString() : new Date().toISOString(), 
+        endDatetime: new Date().toISOString(), 
+        status: false, 
+      };
+
+      const newReportId = await saveReportToDb(reportToSave);
+
+      await saveChecklistToDb(newReportId, checkedItems);
+
+      // 写真がある場合は保存（現在はダミーURL）
+      if (uploadedPhotos.length > 0) {
+        const dummyPhotoUrl = "https://example.com/photo.jpg"; // 仮のURL
+        await savePhotoToDb(dummyPhotoUrl, newReportId);
+      }
+
+      // 実際の作業時間を計算して保存
+      if (workStartTime) {
+        const workEndTime = new Date();
+        const workDurationMs = workEndTime.getTime() - workStartTime.getTime();
+        const workDurationMinutes = Math.floor(workDurationMs / 60000);
+        const hours = Math.floor(workDurationMinutes / 60);
+        const minutes = workDurationMinutes % 60;
+        const requiredTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:00`;
+
+        console.log(`実際の作業時間: ${hours}時間${minutes}分 (${requiredTime})`);
+        await saveLocationTimeToDb(newReportId, currentChecklist?.title || "清掃作業", requiredTime);
+      }
+
+      alert("報告書が正常に提出されました！");
+      console.log("報告書データと関連データをすべてDBに保存しました");
+      setReportModalOpen(false);
+      setCompleted(true); 
+    } catch (err) {
+      console.error("報告書提出エラー:", err);
+      alert(`報告書の提出に失敗しました: ${err instanceof Error ? err.message : '不明なエラー'}`);
+      setReportModalOpen(false); 
     }
   };
 
@@ -137,40 +235,6 @@ const ChecklistScreen = () => {
 
   const generateReport = () => {
     setReportModalOpen(true);
-  };
-
-  const submitReport = async () => {
-    try {
-      // チェック状態を保存
-      await saveChecklistToDb(checkedItems);
-      
-      // 写真がある場合は保存
-      if (uploadedPhotos.length > 0) {
-        const dummyPhotoUrl = "https://example.com/photo.jpg";
-        await savePhotoToDb(dummyPhotoUrl);
-      }
-      
-      // 実際の作業時間を計算して保存
-      if (workStartTime) {
-        const workEndTime = new Date();
-        const workDurationMs = workEndTime.getTime() - workStartTime.getTime();
-        const workDurationMinutes = Math.floor(workDurationMs / 60000);
-        const hours = Math.floor(workDurationMinutes / 60);
-        const minutes = workDurationMinutes % 60;
-        
-        const requiredTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:00`;
-        
-        console.log(`実際の作業時間: ${hours}時間${minutes}分 (${requiredTime})`);
-        await saveLocationTimeToDb(currentChecklist?.title || "清掃作業", requiredTime);
-      }
-      
-      console.log("報告書データをすべてDBに保存しました");
-    } catch (err) {
-      console.error("報告書保存エラー:", err);
-    }
-    
-    setReportModalOpen(false);
-    setCompleted(true);
   };
 
   if (completed) {
@@ -258,4 +322,4 @@ const ChecklistScreen = () => {
   );
 };
 
-export default ChecklistScreen;
+export default Checklist;

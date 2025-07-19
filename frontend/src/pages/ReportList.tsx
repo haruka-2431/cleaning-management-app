@@ -22,25 +22,24 @@ export interface Report {
 // タブの型定義
 export type TabType = "unconfirmed" | "confirmed";
 
-const [reportData, setReportData] = useState<Report[]>([]);
-
-useEffect(() => {
-  const fetchReports = async () => {
-    try {
-      const response = await fetch(`${MY_API_URL}/reports`);
-      const data = await response.json();
-      setReportData(data.reports);
-    } catch (err) {
-      console.error("レポート取得エラー:", err);
-      setReportData([]);
-    }
-  };
-  
-  fetchReports();
-}, []);
-
-
 const Reportlist = () => {
+  const [reportData, setReportData] = useState<Report[]>([]); 
+
+  useEffect(() => { 
+    const fetchReports = async () => {
+      try {
+        const response = await fetch(`${MY_API_URL}/clean_report`);
+        const data = await response.json();
+        setReportData(data.reports);
+      } catch (err) {
+        console.error("レポート取得エラー:", err);
+        setReportData([]);
+      }
+    };
+    
+    fetchReports();
+  }, []); 
+
   const nav = useNavigate();
   const [activeTab, setActiveTab] = useState<TabType>("unconfirmed");
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
@@ -112,7 +111,7 @@ const Reportlist = () => {
 
       <div className="fixed bottom-0 left-0 right-0 px-4 py-8 z-10 bg-white">
         <button className="btn bg-cyan-800 text-white w-full gap-2 shadow-lg h-14"
-        onClick={() => nav("/adimn/cleaning-edit")}>
+        onClick={() => nav("/admin/cleaning-edit")}>
           データの編集
           <svg
             xmlns="http://www.w3.org/2000/svg"

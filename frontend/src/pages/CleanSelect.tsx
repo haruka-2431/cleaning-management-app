@@ -37,15 +37,14 @@ const CleanSelect = ({}: CleanSelectProps) => {
   const [cleaningLocation, setCleaningLocation] = useState("");
   const [locationOptions, setLocationOptions] = useState<LocationOption[]>([]);
 
-  // ← DBから場所オプション取得（any型を修正）
   const fetchLocationOptions = async (typeName: string) => {
     try {
-      const response = await fetch(`${MY_API_URL}/types-areas`);
-      const data: ApiResponse = await response.json(); // ← 型指定
+      const response = await fetch(`${MY_API_URL}/cleaning_area`);
+      const data: ApiResponse = await response.json(); 
       
-      const targetType = data.types.find((type: CleaningType) => type.name === typeName); // ← 型指定
+      const targetType = data.types.find((type: CleaningType) => type.name === typeName); 
       if (targetType) {
-        const options = targetType.areas.map((area: CleaningArea) => ({ // ← 型指定
+        const options = targetType.areas.map((area: CleaningArea) => ({ 
           value: area.name,
           label: area.name
         }));

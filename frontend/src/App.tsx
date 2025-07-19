@@ -16,12 +16,21 @@ import Checklist from "./pages/Checklist";
 import Reportlist from "./pages/Reportlist";
 import CleaningEdit from "./pages/CleaningEdit";
 import List from "./pages/List";
+import Opening from './pages/Opening';
 
 const App = () => {
   const [title, setTitle] = useState<string>("");
+   const [showOpening, setShowOpening] = useState<boolean>(true);
+
+  const handleOpeningComplete = () => {
+    setShowOpening(false);
+  };
 
   return (
     <AuthProvider>
+      {showOpening ? (
+        <Opening onComplete={handleOpeningComplete} />
+      ) : (
       <Router>
         <Routes>
           <Route path="/" element={<Navigate to="/manager-select" />} />
@@ -69,6 +78,7 @@ const App = () => {
           <Route path="*" element={<Navigate to="/manager-select" replace />} />
         </Routes>
       </Router>
+      )}
     </AuthProvider>
   );
 };

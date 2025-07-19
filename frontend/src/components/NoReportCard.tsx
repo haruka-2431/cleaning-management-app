@@ -6,7 +6,7 @@ interface NoReportsCardProps {
 
 const NoReportsCard = ({ activeTab }: NoReportsCardProps) => {
   return (
-    <div className="card bg-white shadow-md mt-6">
+    <div className="bg-white mt-6">
       <div className="card-body text-center py-12">
         <div className="text-base-content/50 text-lg mb-2">
           <svg
