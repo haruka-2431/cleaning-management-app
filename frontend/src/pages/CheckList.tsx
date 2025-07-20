@@ -7,7 +7,7 @@ import ChecklistSection from "../components/ChecklistSection";
 import ReportModal from "../components/ReportModal";
 import CompletedScreen from "../components/CompletedScreen";
 
-export const MY_API_URL = "http://localhost:3000/my";
+export const MY_API_URL = "http://localhost:3000/another";
 
 interface CheckedItems {
   [key: string]: boolean;

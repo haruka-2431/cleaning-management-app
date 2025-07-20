@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 
-export const MY_API_URL = "http://localhost:3000/my"; 
+export const MY_API_URL = "http://localhost:3000/another";
 
 // 型定義
 interface CleanSelectProps {
@@ -32,33 +32,36 @@ const CleanSelect = ({}: CleanSelectProps) => {
   const fetchLocationOptions = async (typeName: string) => {
     try {
       console.log("API呼び出し開始:", `${MY_API_URL}/cleaning_area`);
-      
+
       const response = await fetch(`${MY_API_URL}/cleaning_area`);
       console.log("レスポンス状態:", response.status);
-      
+
       const data: CleaningArea[] = await response.json();
       console.log("取得データ:", data);
-      
+
       // 配列を直接処理
       if (!data || !Array.isArray(data)) {
         console.error("不正なデータ形式:", data);
         setLocationOptions(getStaticLocationOptions(typeName));
         return;
       }
-      
+
       // type_name でフィルタリングして area_name を取得
-      const filteredAreas = data.filter((item: CleaningArea) => item.type_name === typeName);
-      
+      const filteredAreas = data.filter(
+        (item: CleaningArea) => item.type_name === typeName
+      );
+
       // ← 重複する area_name を除去
-      const uniqueAreaNames = Array.from(new Set(filteredAreas.map(item => item.area_name)));
+      const uniqueAreaNames = Array.from(
+        new Set(filteredAreas.map((item) => item.area_name))
+      );
       const options = uniqueAreaNames.map((areaName: string) => ({
         value: areaName,
-        label: areaName
+        label: areaName,
       }));
-      
+
       console.log("フィルタ結果:", options);
       setLocationOptions(options);
-      
     } catch (err) {
       console.error("場所取得エラー:", err);
       setLocationOptions(getStaticLocationOptions(typeName));
@@ -94,7 +97,10 @@ const CleanSelect = ({}: CleanSelectProps) => {
   useEffect(() => {
     if (cleaningType) {
       // ← 巡回清掃・ハウスクリーニングは場所選択不要
-      if (cleaningType === "巡回清掃" || cleaningType === "ハウスクリーニング") {
+      if (
+        cleaningType === "巡回清掃" ||
+        cleaningType === "ハウスクリーニング"
+      ) {
         setLocationOptions([]);
         setCleaningLocation("選択なし"); // ← 自動で「選択なし」をセット
       } else {
@@ -117,13 +123,14 @@ const CleanSelect = ({}: CleanSelectProps) => {
 
   const handleSubmit = () => {
     // ← 巡回清掃・ハウスクリーニングは場所チェック不要
-    const isLocationRequired = cleaningType !== "巡回清掃" && cleaningType !== "ハウスクリーニング";
-    
+    const isLocationRequired =
+      cleaningType !== "巡回清掃" && cleaningType !== "ハウスクリーニング";
+
     if (cleaningType && (cleaningLocation || !isLocationRequired)) {
       nav("/worker/Checklist", {
-        state: { 
-          type: cleaningType, 
-          location: cleaningLocation || "選択なし" 
+        state: {
+          type: cleaningType,
+          location: cleaningLocation || "選択なし",
         },
       });
     } else {
@@ -132,7 +139,8 @@ const CleanSelect = ({}: CleanSelectProps) => {
   };
 
   // ← バリデーション調整
-  const isLocationRequired = cleaningType !== "巡回清掃" && cleaningType !== "ハウスクリーニング";
+  const isLocationRequired =
+    cleaningType !== "巡回清掃" && cleaningType !== "ハウスクリーニング";
   const isFormValid = cleaningType && (cleaningLocation || !isLocationRequired);
 
   return (
@@ -170,27 +178,36 @@ const CleanSelect = ({}: CleanSelectProps) => {
               className="select text-sm h-14 max-w-80 w-full text-slate-800 bg-white border border-gray-300 rounded-lg px-4 focus:border-cyan-800 focus:ring-1 focus:ring-cyan-800 focus:ring-opacity-20"
               value={cleaningLocation}
               onChange={(e) => setCleaningLocation(e.target.value)}
-              disabled={!cleaningType || cleaningType === "巡回清掃" || cleaningType === "ハウスクリーニング" || locationOptions.length === 1}
+              disabled={
+                !cleaningType ||
+                cleaningType === "巡回清掃" ||
+                cleaningType === "ハウスクリーニング" ||
+                locationOptions.length === 1
+              }
             >
               <option className="text-neutral-400" value="" disabled hidden>
                 {!cleaningType
                   ? "先に清掃タイプを選択してください"
-                  : cleaningType === "巡回清掃" || cleaningType === "ハウスクリーニング"
-                  ? "場所の選択は不要です"
-                  : "清掃場所を選択"}
+                  : cleaningType === "巡回清掃" ||
+                      cleaningType === "ハウスクリーニング"
+                    ? "場所の選択は不要です"
+                    : "清掃場所を選択"}
               </option>
               {/* ← 巡回清掃・ハウスクリーニングの場合は「選択なし」オプションを表示 */}
-              {cleaningType && (cleaningType === "巡回清掃" || cleaningType === "ハウスクリーニング") && (
-                <option value="選択なし">選択なし</option>
-              )}
+              {cleaningType &&
+                (cleaningType === "巡回清掃" ||
+                  cleaningType === "ハウスクリーニング") && (
+                  <option value="選択なし">選択なし</option>
+                )}
               {/* ← その他の場合は通常のオプション */}
-              {cleaningType && cleaningType !== "巡回清掃" && cleaningType !== "ハウスクリーニング" && 
+              {cleaningType &&
+                cleaningType !== "巡回清掃" &&
+                cleaningType !== "ハウスクリーニング" &&
                 locationOptions.map((option) => (
                   <option key={option.value} value={option.value}>
                     {option.label}
                   </option>
-                ))
-              }
+                ))}
             </select>
           </fieldset>
 

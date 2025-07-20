@@ -7,7 +7,7 @@ import {
 } from "@heroicons/react/24/outline";
 import PhotoModal from "./PhotoModal";
 
-export const MY_API_URL = "http://localhost:3000/my";
+export const MY_API_URL = "http://localhost:3000/another";
 
 // 型定義
 interface User {
@@ -37,7 +37,8 @@ const ReportModal = ({
   selectedPersonInCharge,
   setSelectedPersonInCharge,
 }: ReportModalProps) => {
-  const [isPersonDropdownOpen, setPersonDropdownOpen] = useState<boolean>(false);
+  const [isPersonDropdownOpen, setPersonDropdownOpen] =
+    useState<boolean>(false);
   const [showPhotoModal, setShowPhotoModal] = useState<boolean>(false);
   const [registeredUsers, setRegisteredUsers] = useState<string[]>([]);
 
@@ -47,28 +48,32 @@ const ReportModal = ({
       try {
         const response = await fetch(`${MY_API_URL}/user`);
         const data: User[] = await response.json();
-        
+
         // 配列を直接処理
         if (!data || !Array.isArray(data)) {
           console.error("不正なユーザーデータ形式:", data);
           // フォールバック用静的データ
-          setRegisteredUsers(["山田太郎", "相沢佳奈", "佐藤佳次", "岡崎かなた"]);
+          setRegisteredUsers([
+            "山田太郎",
+            "相沢佳奈",
+            "佐藤佳次",
+            "岡崎かなた",
+          ]);
           return;
         }
-        
+
         // status=1（アクティブ）のユーザーのみ取得
         const activeUsers = data.filter((user: User) => user.status === 1);
         const userNames = activeUsers.map((user: User) => user.name);
-        
+
         setRegisteredUsers(userNames);
-        
       } catch (err) {
         console.error("ユーザー取得エラー:", err);
         // フォールバック用静的データ
         setRegisteredUsers(["山田太郎", "相沢佳奈", "佐藤佳次", "岡崎かなた"]);
       }
     };
-    
+
     if (isOpen) {
       fetchUsers();
     }
