@@ -7,6 +7,17 @@ import {
 } from "@heroicons/react/24/outline";
 import PhotoModal from "./PhotoModal";
 
+export const MY_API_URL = "http://localhost:3000/another";
+
+// 型定義
+interface User {
+  id: number;
+  name: string;
+  email: string;
+  position: string;
+  status: number;
+}
+
 interface ReportModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -17,16 +28,7 @@ interface ReportModalProps {
   setSelectedPersonInCharge: React.Dispatch<React.SetStateAction<string>>;
 }
 
-export const MY_API_URL = "http://localhost:3000/my"; 
-
-interface User {
-  id: number;
-  name: string;
-  email: string;
-  position: string;
-}
-
-const ReportModal = ({ 
+const ReportModal = ({
   isOpen,
   onClose,
   onSubmit,
@@ -35,28 +37,49 @@ const ReportModal = ({
   selectedPersonInCharge,
   setSelectedPersonInCharge,
 }: ReportModalProps) => {
-  const [registeredUsers, setRegisteredUsers] = useState<string[]>([]);
-  const [isPersonDropdownOpen, setPersonDropdownOpen] = useState<boolean>(false);
+  const [isPersonDropdownOpen, setPersonDropdownOpen] =
+    useState<boolean>(false);
   const [showPhotoModal, setShowPhotoModal] = useState<boolean>(false);
+  const [registeredUsers, setRegisteredUsers] = useState<string[]>([]);
 
+  // ユーザー一覧取得
   useEffect(() => {
     const fetchUsers = async () => {
       try {
         const response = await fetch(`${MY_API_URL}/user`);
-        const data = await response.json();
-        const userNames = data.users.map((user: User) => user.name);
+        const data: User[] = await response.json();
+
+        // 配列を直接処理
+        if (!data || !Array.isArray(data)) {
+          console.error("不正なユーザーデータ形式:", data);
+          // フォールバック用静的データ
+          setRegisteredUsers([
+            "山田太郎",
+            "相沢佳奈",
+            "佐藤佳次",
+            "岡崎かなた",
+          ]);
+          return;
+        }
+
+        // status=1（アクティブ）のユーザーのみ取得
+        const activeUsers = data.filter((user: User) => user.status === 1);
+        const userNames = activeUsers.map((user: User) => user.name);
+
         setRegisteredUsers(userNames);
       } catch (err) {
         console.error("ユーザー取得エラー:", err);
         // フォールバック用静的データ
-        setRegisteredUsers(["田中太郎", "佐藤花子", "山田次郎"]);
+        setRegisteredUsers(["山田太郎", "相沢佳奈", "佐藤佳次", "岡崎かなた"]);
       }
     };
-    
-    fetchUsers();
-  }, []);
 
-  const personOptions: string[] = ["追加者なし", ...registeredUsers]; 
+    if (isOpen) {
+      fetchUsers();
+    }
+  }, [isOpen]);
+
+  const personOptions: string[] = ["追加者なし", ...registeredUsers];
 
   const handlePhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
@@ -70,7 +93,7 @@ const ReportModal = ({
       className="fixed inset-0 bg-black flex items-center justify-center z-50 p-4"
       style={{ backgroundColor: "rgba(0, 0, 0, 0.8)" }}
     >
-      <div className="bg-white rounded-lg w-full max-w-md mx-auto max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-lg w-full max-w-md mx-auto max-h-[90vh]">
         <div className="flex items-center justify-between p-6">
           <div className="w-5"></div>
           <h3 className="font-bold">報告書</h3>
@@ -157,7 +180,7 @@ const ReportModal = ({
               />
             </button>
             {isPersonDropdownOpen && (
-              <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
+              <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 max-h-48 overflow-y-auto">
                 {personOptions.map((option) => (
                   <button
                     key={option}

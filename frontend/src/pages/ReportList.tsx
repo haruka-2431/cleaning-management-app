@@ -5,9 +5,9 @@ import ReportTable from "../components/ReportTable";
 import ReportDetailModal from "../components/ReportDetailModal";
 import NoReportsCard from "../components/NoReportCard";
 
-export const MY_API_URL = "http://localhost:3000/my"; 
+export const MY_API_URL = "http://localhost:3000/another";
 
-// レポートデータの型定義
+// レポートデータ型定義
 export interface Report {
   id: number;
   user: string;
@@ -17,37 +17,138 @@ export interface Report {
   startDatetime: string;
   endDatetime: string;
   status: boolean;
+  // API更新用の生データ
+  user_id?: number;
+  sub_user_id?: number | null;
+  type_id?: number;
+  area_id?: number;
+  raw_start_datetime?: string;
+  raw_end_datetime?: string;
 }
 
 // タブの型定義
 export type TabType = "unconfirmed" | "confirmed";
 
-const Reportlist = () => {
-  const [reportData, setReportData] = useState<Report[]>([]); 
-
-  useEffect(() => { 
-    const fetchReports = async () => {
-      try {
-        const response = await fetch(`${MY_API_URL}/clean_report`);
-        const data = await response.json();
-        setReportData(data.reports);
-      } catch (err) {
-        console.error("レポート取得エラー:", err);
-        setReportData([]);
-      }
-    };
-    
-    fetchReports();
-  }, []); 
-
+const ReportList = () => {
   const nav = useNavigate();
   const [activeTab, setActiveTab] = useState<TabType>("unconfirmed");
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
+  const [reportData, setReportData] = useState<Report[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+
+  // DBからレポートデータ取得
+  const fetchReports = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(`${MY_API_URL}/cleaning_report`);
+      const data = await response.json();
+      
+      if (Array.isArray(data)) {
+        if (data.length === 0) {
+          setReportData(getStaticReportData());
+        } else {
+          // データ形式を変換
+          const formattedReports = data.map((item) => {
+            const formatted = {
+              id: item.id || Math.random(),
+              user: item.user_name || item.user || "不明",
+              subUser: item.sub_user_name || item.subUser || undefined,
+              type: item.cleaning_type || item.type || "不明",
+              area: item.cleaning_area || item.area || "不明",
+              startDatetime: item.start_datetime || item.startDatetime || "不明",
+              endDatetime: item.end_datetime || item.endDatetime || "不明",
+              status: Boolean(
+                item.status === 1 || 
+                item.status === true || 
+                item.status === "1" || 
+                item.is_confirmed === 1 || 
+                item.is_confirmed === true || 
+                item.is_confirmed === "1"
+              ),
+              // API更新用の生データを保持
+              user_id: item.user_id,
+              sub_user_id: item.sub_user_id,
+              type_id: item.type_id,
+              area_id: item.area_id,
+              raw_start_datetime: item.raw_start_datetime,
+              raw_end_datetime: item.raw_end_datetime,
+            };
+            
+            return formatted;
+          });
+          
+          setReportData(formattedReports);
+        }
+      } else {
+        console.error("データが配列ではありません");
+        setReportData(getStaticReportData());
+      }
+      
+    } catch (err) {
+      console.error("レポート取得エラー:", err);
+      setReportData(getStaticReportData());
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // フォールバック用の静的データ
+  const getStaticReportData = (): Report[] => {
+    return [
+      {
+        id: 1,
+        user: "山田太郎",
+        subUser: "相沢佳奈",
+        type: "民泊清掃",
+        area: "天神民泊",
+        startDatetime: "2024-01-15 09:00",
+        endDatetime: "2024-01-15 12:30",
+        status: false,
+      },
+      {
+        id: 2,
+        user: "佐藤佳次",
+        subUser: undefined,
+        type: "施設清掃",
+        area: "サンホームさくら本館",
+        startDatetime: "2024-01-15 14:00",
+        endDatetime: "2024-01-15 17:00",
+        status: false,
+      },
+      {
+        id: 3,
+        user: "岡崎かなた",
+        subUser: "山田太郎",
+        type: "ハウスクリーニング",
+        area: "選択なし",
+        startDatetime: "2024-01-14 10:00",
+        endDatetime: "2024-01-14 15:30",
+        status: true,
+      },
+      {
+        id: 4,
+        user: "相沢佳奈",
+        subUser: undefined,
+        type: "巡回清掃",
+        area: "選択なし",
+        startDatetime: "2024-01-14 08:00",
+        endDatetime: "2024-01-14 10:00",
+        status: true,
+      },
+    ];
+  };
+
+  // 初回読み込み時にデータ取得
+  useEffect(() => {
+    fetchReports();
+  }, []);
 
   // レポートをフィルタリング
-  const filteredReports = reportData.filter((report) =>
-    activeTab === "unconfirmed" ? !report.status : report.status
-  );
+  const filteredReports = reportData?.filter((report) => {
+    const isConfirmed = report.status;
+    const shouldShow = activeTab === "unconfirmed" ? !isConfirmed : isConfirmed;
+    return shouldShow;
+  }) || [];
 
   // モーダル開閉のハンドラ
   const openDetailModal = useCallback((report: Report) => {
@@ -58,13 +159,65 @@ const Reportlist = () => {
     setSelectedReport(null);
   }, []);
 
-  // レポート確認済みのハンドラ
-  const handleConfirmReport = useCallback(() => {
-    setActiveTab("confirmed");
-    closeDetailModal();
-    alert("確認済みに変更しました");
-    // ここでAPIを呼び出すなどの実際の処理を追加
-  }, [closeDetailModal]);
+  // 確認済み処理
+  const handleConfirmReport = async () => {
+    if (!selectedReport) {
+      return;
+    }
+    
+    // 必須フィールドチェック
+    const missingFields = [];
+    if (!selectedReport.user_id) missingFields.push("user_id");
+    if (!selectedReport.type_id) missingFields.push("type_id");
+    if (!selectedReport.area_id) missingFields.push("area_id");
+    if (!selectedReport.raw_start_datetime) missingFields.push("raw_start_datetime");
+    if (!selectedReport.raw_end_datetime) missingFields.push("raw_end_datetime");
+    
+    if (missingFields.length > 0) {
+      console.error("必要なデータが不足しています:", missingFields.join(", "));
+      alert(`データ不足: ${missingFields.join(", ")}`);
+      return;
+    }
+    
+    try {
+      const formatDateTimeForMySQL = (isoString: string | null | undefined): string | null => {
+        if (!isoString) return null;
+        return isoString.slice(0, 19).replace('T', ' ');
+      };
+      
+      const updateData = {
+        user_id: selectedReport.user_id,
+        sub_user_id: selectedReport.sub_user_id || null,
+        type_id: selectedReport.type_id,
+        area_id: selectedReport.area_id,
+        start_datetime: formatDateTimeForMySQL(selectedReport.raw_start_datetime),
+        end_datetime: formatDateTimeForMySQL(selectedReport.raw_end_datetime),
+        status: 1
+      };
+      
+      const response = await fetch(`${MY_API_URL}/cleaning_report/${selectedReport.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updateData),
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("API更新エラー:", errorText);
+        throw new Error(`API更新失敗: ${response.status} - ${errorText}`);
+      }
+      
+      // 成功処理
+      closeDetailModal();
+      await fetchReports();
+      setActiveTab("confirmed");
+      alert("確認済みに変更しました！");
+      
+    } catch (error) {
+      console.error("確認済み処理エラー:", error);
+      alert(`エラー: ${error}`);
+    }
+  };
 
   return (
     <div className="min-h-screen">
@@ -76,7 +229,7 @@ const Reportlist = () => {
       <div className="container mx-auto px-4 py-6 lg:pt-30">
         <div
           role="tablist"
-          className="tabs tabs-lift w-full sticky top-20 sm:top-28 lg:top-32 bg-white z-40"
+          className="tabs tabs-lift w-full sticky top-28 sm:top-28 lg:top-32 bg-white z-40"
         >
           <button
             role="tab"
@@ -102,7 +255,14 @@ const Reportlist = () => {
           </button>
         </div>
         
-        {filteredReports.length > 0 ? (
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-800 mx-auto mb-4"></div>
+              <p className="text-gray-600">レポートを読み込み中...</p>
+            </div>
+          </div>
+        ) : filteredReports.length > 0 ? (
           <ReportTable reports={filteredReports} onOpenDetail={openDetailModal} />
         ) : (
           <NoReportsCard activeTab={activeTab} />
@@ -110,8 +270,10 @@ const Reportlist = () => {
       </div>
 
       <div className="fixed bottom-0 left-0 right-0 px-4 py-8 z-10 bg-white">
-        <button className="btn bg-cyan-800 text-white w-full gap-2 shadow-lg h-14"
-        onClick={() => nav("/admin/cleaning-edit")}>
+        <button 
+          className="btn bg-cyan-800 text-white w-full gap-2 shadow-lg h-14"
+          onClick={() => nav("/admin/cleaning-edit")}
+        >
           データの編集
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -144,4 +306,4 @@ const Reportlist = () => {
   );
 };
 
-export default Reportlist;
+export default ReportList;

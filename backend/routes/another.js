@@ -19,9 +19,7 @@ function isValidType(type) {
 module.exports = (connection) => {
   const router = express.Router();
 
-  // 特別なアクション付きエンドポイント
-  // GET /my/cleaning_spot/select_spot/1
-  // GET /my/photo/select_by_report/1
+  // アクション付きエンドポイント
   router.get("/:type/:action/:id", (req, res) => {
     const { type, action, id } = req.params;
     const validActions = [
@@ -44,7 +42,6 @@ module.exports = (connection) => {
   });
 
   // 全データ取得
-  // GET /my/user
   router.get("/:type", (req, res) => {
     const type = req.params.type;
     handleQuery({
@@ -56,7 +53,6 @@ module.exports = (connection) => {
   });
 
   // データ挿入
-  // POST /my/user
   router.post("/:type", (req, res) => {
     const type = req.params.type;
 
@@ -64,6 +60,7 @@ module.exports = (connection) => {
     try {
       params = paramsBuilder(type, req.body);
     } catch (err) {
+      console.error(`Parameter validation error for ${type}:`, err.message);
       return res.status(400).send(err.message);
     }
 
@@ -77,29 +74,26 @@ module.exports = (connection) => {
   });
 
   // データ更新
-  // PUT /my/user/1
   router.put("/:type/:id", (req, res) => {
     const type = req.params.type;
     const id = Number(req.params.id);
+    const data = req.body;
 
-    let params;
-    try {
-      params = paramsBuilder(type, req.body, id);
-    } catch (err) {
-      return res.status(400).send(err.message);
+    if (!isValidType(type)) {
+      console.error(`Invalid table name: ${type}`);
+      return res.status(400).send("Invalid table name");
     }
 
-    handleQuery({
-      type,
-      key: "update",
-      params,
-      res,
-      connection,
-    });
+    try {
+      params = paramsBuilder(type, data, id);
+      handleQuery({ type, key: "update", params, res, connection });
+    } catch (error) {
+      console.error(`Parameter validation error for ${type}:`, error.message);
+      return res.status(400).send(`Missing required fields for ${type}`);
+    }
   });
 
   // データ削除
-  // DELETE /my/user/1
   router.delete("/:type/:id", (req, res) => {
     const type = req.params.type;
     const id = Number(req.params.id);
@@ -113,7 +107,6 @@ module.exports = (connection) => {
   });
 
   // レポート単位での削除（photo, location_time用）
-  // DELETE /my/photo/report/1
   router.delete("/:type/report/:id", (req, res) => {
     const type = req.params.type;
     const reportId = Number(req.params.id);
@@ -136,21 +129,29 @@ module.exports = (connection) => {
 
 function paramsBuilder(type, data, id = null) {
   switch (type) {
+    case "cleaning_report":
+      const requiredFields = ['user_id', 'type_id', 'area_id', 'start_datetime', 'end_datetime', 'status'];
+      const missingFields = [];
+      
+      for (const field of requiredFields) {
+        if (data[field] === undefined || data[field] === null) {
+          missingFields.push(field);
+        }
+      }
+      
+      if (missingFields.length > 0) {
+        throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
+      }
+      
+      return id 
+        ? [data.user_id, data.sub_user_id, data.type_id, data.area_id, data.start_datetime, data.end_datetime, data.status, id]
+        : [data.user_id, data.sub_user_id, data.type_id, data.area_id, data.start_datetime, data.end_datetime, data.status];
+
     case "user":
-      if (
-        !data.first_name ||
-        !data.last_name ||
-        !data.email ||
-        !data.position
-      ) {
+      if (!data.first_name || !data.last_name || !data.email || !data.position) {
         throw new Error("Missing required fields for user");
       }
-      const userParams = [
-        data.first_name,
-        data.last_name,
-        data.email,
-        data.position,
-      ];
+      const userParams = [data.first_name, data.last_name, data.email, data.position];
       return id ? [...userParams, id] : userParams;
 
     case "cleaning_type":
@@ -172,29 +173,10 @@ function paramsBuilder(type, data, id = null) {
       return id ? [data.area_id, data.location, id] : [data.area_id, data.location];
 
     case "checklist":
-      if (
-        typeof data.spot_id !== "number" ||
-        typeof data.item !== "string" ||
-        !data.item.trim()
-      ) {
+      if (typeof data.spot_id !== "number" || typeof data.item !== "string" || !data.item.trim()) {
         throw new Error("Missing or invalid fields for checklist");
       }
       return id ? [data.spot_id, data.item, id] : [data.spot_id, data.item];
-
-    case "cleaning_report":
-      if (
-        !data.user_id ||
-        !data.type_id ||
-        !data.area_id ||
-        !data.start_datetime ||
-        !data.end_datetime ||
-        typeof data.status !== "boolean"
-      ) {
-        throw new Error("Missing required fields for cleaning_report");
-      }
-      return id
-        ? [data.user_id, data.sub_user_id, data.type_id, data.area_id, data.start_datetime, data.end_datetime, data.status, id]
-        : [data.user_id, data.sub_user_id, data.type_id, data.area_id, data.start_datetime, data.end_datetime, data.status];
 
     case "photo":
       if (!data.report_id || !data.photo_url || !data.posted_datetime) {
@@ -213,22 +195,26 @@ function paramsBuilder(type, data, id = null) {
         : [data.report_id, data.task_name, data.required_time];
 
     default:
-      throw new Error("Unsupported type for param building");
+      throw new Error(`Unknown type: ${type}`);
   }
 }
 
 function handleQuery({ type, key, params = [], res, connection }) {
-  // typeが有効の物かどうか
-  if (!isValidType(type)) return res.status(400).send("Invalid table name");
+  if (!isValidType(type)) {
+    return res.status(400).send("Invalid table name");
+  }
 
   const sql = getSQL(type, key);
-  // 指定されたSQLがあるかどうか
-  if (!sql) return res.status(500).send("SQL Not Found");
+  if (!sql) {
+    console.error(`SQL not found for type: ${type}, key: ${key}`);
+    return res.status(500).send("SQL Not Found");
+  }
 
   connection.query(sql, params, (err, result) => {
     if (err) {
-      console.error(err);
-      return res.status(500).send("DB error");
+      console.error(`Database error - Type: ${type}, Key: ${key}`);
+      console.error(`Error code: ${err.code}, Message: ${err.sqlMessage}`);
+      return res.status(500).send(`Database operation failed`);
     }
 
     if (key.startsWith("select")) {
@@ -236,7 +222,7 @@ function handleQuery({ type, key, params = [], res, connection }) {
     } else if (key === "insert") {
       res.status(201).json({ insertedId: result.insertId });
     } else {
-      res.sendStatus(200);
+      res.status(200).json({ success: true, affectedRows: result.affectedRows });
     }
   });
 }

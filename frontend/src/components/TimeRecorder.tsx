@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
-export const MY_API_URL = "http://localhost:3000/my";
+export const MY_API_URL = "http://localhost:3000/another";
 
 interface LocationTime {
   id: number;
@@ -18,7 +18,9 @@ const TimeRecorder: React.FC<TimeRecorderProps> = ({ reportId }) => {
 
   const fetchLocationTimes = async () => {
     try {
-      const res = await fetch(`${MY_API_URL}/location_time/select_by_report/${reportId}`);
+      const res = await fetch(
+        `${MY_API_URL}/location_time/select_by_report/${reportId}`
+      );
       if (res.ok) {
         const data = await res.json();
         setLocationTimes(data);
@@ -52,17 +54,19 @@ const TimeRecorder: React.FC<TimeRecorderProps> = ({ reportId }) => {
   return (
     <div className="p-3 bg-yellow-50 rounded">
       <h4 className="font-medium mb-2">所要時間記録</h4>
-      
-      <form onSubmit={(e) => {
-        e.preventDefault();
-        const formData = new FormData(e.target as HTMLFormElement);
-        const taskName = formData.get('task_name') as string;
-        const requiredTime = formData.get('required_time') as string;
-        if (taskName && requiredTime) {
-          saveLocationTime(taskName, requiredTime);
-          (e.target as HTMLFormElement).reset();
-        }
-      }}>
+
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          const formData = new FormData(e.target as HTMLFormElement);
+          const taskName = formData.get("task_name") as string;
+          const requiredTime = formData.get("required_time") as string;
+          if (taskName && requiredTime) {
+            saveLocationTime(taskName, requiredTime);
+            (e.target as HTMLFormElement).reset();
+          }
+        }}
+      >
         <div className="flex gap-2 mb-2">
           <input
             name="task_name"
@@ -86,7 +90,7 @@ const TimeRecorder: React.FC<TimeRecorderProps> = ({ reportId }) => {
           </button>
         </div>
       </form>
-      
+
       {locationTimes.length > 0 && (
         <div className="text-xs space-y-1">
           {locationTimes.map((time) => (
