@@ -19,7 +19,7 @@ function isValidType(type) {
 module.exports = (connection) => {
   const router = express.Router();
 
-  // 特別なアクション付きエンドポイント
+  // アクション付きエンドポイント
   router.get("/:type/:action/:id", (req, res) => {
     const { type, action, id } = req.params;
     const validActions = [

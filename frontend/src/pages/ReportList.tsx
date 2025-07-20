@@ -7,7 +7,7 @@ import NoReportsCard from "../components/NoReportCard";
 
 export const MY_API_URL = "http://localhost:3000/another";
 
-// レポートデータの型定義
+// レポートデータ型定義
 export interface Report {
   id: number;
   user: string;

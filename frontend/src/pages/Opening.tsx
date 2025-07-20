@@ -103,7 +103,6 @@ const Opening = ({ onComplete }: OpeningProps) => {
         </div>
       )}
 
-      {/* カスタムCSS */}
       <style>{`
         @keyframes fade-in {
           from {

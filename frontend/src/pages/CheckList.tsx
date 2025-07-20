@@ -46,13 +46,13 @@ const Checklist = () => {
       return type ? type.id : 1;
     } catch (err) {
       console.error("type_id取得エラー:", err);
-      return 1; // デフォルト値
+      return 1; 
     }
   };
 
   const getAreaIdByName = async (areaName: string): Promise<number> => {
     try {
-      // 特別なケース：巡回清掃・ハウスクリーニング・選択なしの場合
+      // 巡回清掃・ハウスクリーニング・選択なしの場合
       if (areaName === "選択なし") {
         const currentType = cleaningData?.type;
         if (currentType === "巡回清掃") {
@@ -60,7 +60,7 @@ const Checklist = () => {
         } else if (currentType === "ハウスクリーニング") {
           return 2; // ハウスクリーニング用のarea_id
         } else {
-          return 1; // デフォルト
+          return 1; 
         }
       }
       
@@ -74,7 +74,6 @@ const Checklist = () => {
     }
   };
   
-  // テンプレート取得
   useEffect(() => {
     const loadTemplate = async () => {
       if (cleaningData && cleaningData.type && cleaningData.location) {
@@ -191,7 +190,7 @@ const Checklist = () => {
     }
   };
 
-  // メインのsubmitReport関数
+  //submitReport関数
   const submitReport = async () => {
     try {
       // 写真のバリデーション
@@ -199,7 +198,7 @@ const Checklist = () => {
         throw new Error("写真を1枚以上選択してください");
       }
       
-      // STEP 1: cleaning_reportレコードを作成
+      // cleaning_reportレコードを作成
       const workEndTime = new Date();
       
       // 動的にIDを取得
@@ -207,8 +206,8 @@ const Checklist = () => {
       const areaId = await getAreaIdByName(cleaningData?.location || "選択なし");
       
       const reportData = {
-        user_id: 1,  // TODO: 実際のユーザーIDに変更（ログイン機能実装後）
-        sub_user_id: selectedPersonInCharge !== "追加者なし" ? 2 : null,  // TODO: 実際のサブユーザーIDに変更
+        user_id: 1,  // 実際のユーザーIDに変更（ログイン機能実装後）
+        sub_user_id: selectedPersonInCharge !== "追加者なし" ? 2 : null,  // 実際のサブユーザーIDに変更
         type_id: typeId,
         area_id: areaId,
         start_datetime: workStartTime?.toISOString().slice(0, 19).replace('T', ' ') || new Date().toISOString().slice(0, 19).replace('T', ' '),
@@ -231,16 +230,16 @@ const Checklist = () => {
       const reportResult = await reportResponse.json();
       const actualReportId = reportResult.insertedId;
       
-      // STEP 2: 実際のreport_idを使ってチェックリスト保存
+      // 実際のreport_idを使ってチェックリスト保存
       await saveChecklistToDbWithReportId(checkedItems, actualReportId);
       
-      // STEP 3: 実際のreport_idを使って写真保存
+      // 実際のreport_idを使って写真保存
       if (uploadedPhotos.length > 0) {
         const dummyPhotoUrl = "https://example.com/photo.jpg";
         await savePhotoToDbWithReportId(dummyPhotoUrl, actualReportId);
       }
       
-      // STEP 4: 実際のreport_idを使って作業時間保存
+      // 実際のreport_idを使って作業時間保存
       if (workStartTime) {
         const workDurationMs = workEndTime.getTime() - workStartTime.getTime();
         const workDurationMinutes = Math.floor(workDurationMs / 60000);

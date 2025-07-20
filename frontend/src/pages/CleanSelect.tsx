@@ -28,7 +28,7 @@ const CleanSelect = ({}: CleanSelectProps) => {
   const [cleaningLocation, setCleaningLocation] = useState("");
   const [locationOptions, setLocationOptions] = useState<LocationOption[]>([]);
 
-  // DB から場所オプション取得（修正版）
+  // DB から場所オプション取得
   const fetchLocationOptions = async (typeName: string) => {
     try {
       console.log("API呼び出し開始:", `${MY_API_URL}/cleaning_area`);
@@ -51,7 +51,7 @@ const CleanSelect = ({}: CleanSelectProps) => {
         (item: CleaningArea) => item.type_name === typeName
       );
 
-      // ← 重複する area_name を除去
+      // 重複する area_name を除去
       const uniqueAreaNames = Array.from(
         new Set(filteredAreas.map((item) => item.area_name))
       );
@@ -102,7 +102,7 @@ const CleanSelect = ({}: CleanSelectProps) => {
         cleaningType === "ハウスクリーニング"
       ) {
         setLocationOptions([]);
-        setCleaningLocation("選択なし"); // ← 自動で「選択なし」をセット
+        setCleaningLocation("選択なし"); //自動で「選択なし」をセット
       } else {
         fetchLocationOptions(cleaningType);
       }
@@ -122,7 +122,7 @@ const CleanSelect = ({}: CleanSelectProps) => {
   }, [locationOptions]);
 
   const handleSubmit = () => {
-    // ← 巡回清掃・ハウスクリーニングは場所チェック不要
+    // 巡回清掃・ハウスクリーニングは場所チェック不要
     const isLocationRequired =
       cleaningType !== "巡回清掃" && cleaningType !== "ハウスクリーニング";
 
@@ -138,7 +138,7 @@ const CleanSelect = ({}: CleanSelectProps) => {
     }
   };
 
-  // ← バリデーション調整
+  // バリデーション調整
   const isLocationRequired =
     cleaningType !== "巡回清掃" && cleaningType !== "ハウスクリーニング";
   const isFormValid = cleaningType && (cleaningLocation || !isLocationRequired);
@@ -168,7 +168,7 @@ const CleanSelect = ({}: CleanSelectProps) => {
             </select>
           </fieldset>
 
-          {/* ← 清掃場所欄を常に表示 */}
+          {/* 清掃場所欄を常に表示 */}
           <fieldset className="mt-10 mx-auto flex flex-col items-center">
             <legend className="text-base font-semibold mb-2 text-slate-800">
               清掃場所
@@ -193,13 +193,13 @@ const CleanSelect = ({}: CleanSelectProps) => {
                     ? "場所の選択は不要です"
                     : "清掃場所を選択"}
               </option>
-              {/* ← 巡回清掃・ハウスクリーニングの場合は「選択なし」オプションを表示 */}
+              {/* 巡回清掃・ハウスクリーニングの場合は「選択なし」オプションを表示 */}
               {cleaningType &&
                 (cleaningType === "巡回清掃" ||
                   cleaningType === "ハウスクリーニング") && (
                   <option value="選択なし">選択なし</option>
                 )}
-              {/* ← その他の場合は通常のオプション */}
+              {/* その他の場合は通常のオプション */}
               {cleaningType &&
                 cleaningType !== "巡回清掃" &&
                 cleaningType !== "ハウスクリーニング" &&

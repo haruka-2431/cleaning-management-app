@@ -42,7 +42,7 @@ const ReportModal = ({
   const [showPhotoModal, setShowPhotoModal] = useState<boolean>(false);
   const [registeredUsers, setRegisteredUsers] = useState<string[]>([]);
 
-  // ユーザー一覧取得（クリーンバージョン）
+  // ユーザー一覧取得
   useEffect(() => {
     const fetchUsers = async () => {
       try {
