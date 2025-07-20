@@ -17,6 +17,13 @@ export interface Report {
   startDatetime: string;
   endDatetime: string;
   status: boolean;
+  // API更新用の生データ
+  user_id?: number;
+  sub_user_id?: number | null;
+  type_id?: number;
+  area_id?: number;
+  raw_start_datetime?: string;
+  raw_end_datetime?: string;
 }
 
 // タブの型定義
@@ -26,50 +33,66 @@ const ReportList = () => {
   const nav = useNavigate();
   const [activeTab, setActiveTab] = useState<TabType>("unconfirmed");
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
-  const [reportData, setReportData] = useState<Report[]>([]); // ← 初期値を空配列に
+  const [reportData, setReportData] = useState<Report[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
 
-  // ← DBからレポートデータ取得
+  // DBからレポートデータ取得
   const fetchReports = async () => {
     setLoading(true);
     try {
-      console.log("レポート取得開始:", `${MY_API_URL}/cleaning_report`);
-      
       const response = await fetch(`${MY_API_URL}/cleaning_report`);
-      console.log("レスポンス状態:", response.status);
-      
       const data = await response.json();
-      console.log("取得レポートデータ:", data);
       
-      // レスポンス形式を確認して適切に処理
       if (Array.isArray(data)) {
-        // データ形式を変換（DBの形式 → アプリの形式）
-        const formattedReports: Report[] = data.map((item: any) => ({
-          id: item.id || Math.random(),
-          user: item.user_name || item.user || "不明",
-          subUser: item.sub_user_name || item.subUser || undefined,
-          type: item.cleaning_type || item.type || "不明",
-          area: item.cleaning_area || item.area || "不明",
-          startDatetime: item.start_datetime || item.startDatetime || "不明",
-          endDatetime: item.end_datetime || item.endDatetime || "不明",
-          status: item.is_confirmed || item.status || false,
-        }));
-        
-        setReportData(formattedReports);
+        if (data.length === 0) {
+          setReportData(getStaticReportData());
+        } else {
+          // データ形式を変換
+          const formattedReports = data.map((item) => {
+            const formatted = {
+              id: item.id || Math.random(),
+              user: item.user_name || item.user || "不明",
+              subUser: item.sub_user_name || item.subUser || undefined,
+              type: item.cleaning_type || item.type || "不明",
+              area: item.cleaning_area || item.area || "不明",
+              startDatetime: item.start_datetime || item.startDatetime || "不明",
+              endDatetime: item.end_datetime || item.endDatetime || "不明",
+              status: Boolean(
+                item.status === 1 || 
+                item.status === true || 
+                item.status === "1" || 
+                item.is_confirmed === 1 || 
+                item.is_confirmed === true || 
+                item.is_confirmed === "1"
+              ),
+              // API更新用の生データを保持
+              user_id: item.user_id,
+              sub_user_id: item.sub_user_id,
+              type_id: item.type_id,
+              area_id: item.area_id,
+              raw_start_datetime: item.raw_start_datetime,
+              raw_end_datetime: item.raw_end_datetime,
+            };
+            
+            return formatted;
+          });
+          
+          setReportData(formattedReports);
+        }
       } else {
-        console.error("不正なレポートデータ形式:", data);
-        setReportData(getStaticReportData()); // フォールバック
+        console.error("データが配列ではありません");
+        setReportData(getStaticReportData());
       }
       
     } catch (err) {
       console.error("レポート取得エラー:", err);
-      setReportData(getStaticReportData()); // エラー時はフォールバック
+      setReportData(getStaticReportData());
     } finally {
       setLoading(false);
     }
   };
 
-  // ← フォールバック用の静的データ
+  // フォールバック用の静的データ
   const getStaticReportData = (): Report[] => {
     return [
       {
@@ -115,15 +138,17 @@ const ReportList = () => {
     ];
   };
 
-  // ← 初回読み込み時にデータ取得
+  // 初回読み込み時にデータ取得
   useEffect(() => {
     fetchReports();
   }, []);
 
-  // レポートをフィルタリング（安全な処理）
-  const filteredReports = reportData?.filter((report) =>
-    activeTab === "unconfirmed" ? !report.status : report.status
-  ) || []; // ← reportDataがundefinedの場合は空配列
+  // レポートをフィルタリング
+  const filteredReports = reportData?.filter((report) => {
+    const isConfirmed = report.status;
+    const shouldShow = activeTab === "unconfirmed" ? !isConfirmed : isConfirmed;
+    return shouldShow;
+  }) || [];
 
   // モーダル開閉のハンドラ
   const openDetailModal = useCallback((report: Report) => {
@@ -134,13 +159,65 @@ const ReportList = () => {
     setSelectedReport(null);
   }, []);
 
-  // レポート確認済みのハンドラ
-  const handleConfirmReport = useCallback(() => {
-    setActiveTab("confirmed");
-    closeDetailModal();
-    alert("確認済みに変更しました");
-    // ここでAPIを呼び出すなどの実際の処理を追加
-  }, [closeDetailModal]);
+  // 確認済み処理
+  const handleConfirmReport = async () => {
+    if (!selectedReport) {
+      return;
+    }
+    
+    // 必須フィールドチェック
+    const missingFields = [];
+    if (!selectedReport.user_id) missingFields.push("user_id");
+    if (!selectedReport.type_id) missingFields.push("type_id");
+    if (!selectedReport.area_id) missingFields.push("area_id");
+    if (!selectedReport.raw_start_datetime) missingFields.push("raw_start_datetime");
+    if (!selectedReport.raw_end_datetime) missingFields.push("raw_end_datetime");
+    
+    if (missingFields.length > 0) {
+      console.error("必要なデータが不足しています:", missingFields.join(", "));
+      alert(`データ不足: ${missingFields.join(", ")}`);
+      return;
+    }
+    
+    try {
+      const formatDateTimeForMySQL = (isoString: string | null | undefined): string | null => {
+        if (!isoString) return null;
+        return isoString.slice(0, 19).replace('T', ' ');
+      };
+      
+      const updateData = {
+        user_id: selectedReport.user_id,
+        sub_user_id: selectedReport.sub_user_id || null,
+        type_id: selectedReport.type_id,
+        area_id: selectedReport.area_id,
+        start_datetime: formatDateTimeForMySQL(selectedReport.raw_start_datetime),
+        end_datetime: formatDateTimeForMySQL(selectedReport.raw_end_datetime),
+        status: 1
+      };
+      
+      const response = await fetch(`${MY_API_URL}/cleaning_report/${selectedReport.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updateData),
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("API更新エラー:", errorText);
+        throw new Error(`API更新失敗: ${response.status} - ${errorText}`);
+      }
+      
+      // 成功処理
+      closeDetailModal();
+      await fetchReports();
+      setActiveTab("confirmed");
+      alert("確認済みに変更しました！");
+      
+    } catch (error) {
+      console.error("確認済み処理エラー:", error);
+      alert(`エラー: ${error}`);
+    }
+  };
 
   return (
     <div className="min-h-screen">
@@ -152,7 +229,7 @@ const ReportList = () => {
       <div className="container mx-auto px-4 py-6 lg:pt-30">
         <div
           role="tablist"
-          className="tabs tabs-lift w-full sticky top-20 sm:top-28 lg:top-32 bg-white z-40"
+          className="tabs tabs-lift w-full sticky top-28 sm:top-28 lg:top-32 bg-white z-40"
         >
           <button
             role="tab"
@@ -178,7 +255,6 @@ const ReportList = () => {
           </button>
         </div>
         
-        {/* ← ローディング表示 */}
         {loading ? (
           <div className="flex items-center justify-center py-12">
             <div className="text-center">

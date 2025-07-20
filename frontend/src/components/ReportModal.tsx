@@ -41,17 +41,12 @@ const ReportModal = ({
   const [showPhotoModal, setShowPhotoModal] = useState<boolean>(false);
   const [registeredUsers, setRegisteredUsers] = useState<string[]>([]);
 
-  // ユーザー一覧取得（修正版）
+  // ユーザー一覧取得（クリーンバージョン）
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        console.log("ユーザー取得開始:", `${MY_API_URL}/user`);
-        
         const response = await fetch(`${MY_API_URL}/user`);
-        console.log("ユーザーレスポンス状態:", response.status);
-        
         const data: User[] = await response.json();
-        console.log("取得ユーザーデータ:", data);
         
         // 配列を直接処理
         if (!data || !Array.isArray(data)) {
@@ -65,7 +60,6 @@ const ReportModal = ({
         const activeUsers = data.filter((user: User) => user.status === 1);
         const userNames = activeUsers.map((user: User) => user.name);
         
-        console.log("アクティブユーザー:", userNames);
         setRegisteredUsers(userNames);
         
       } catch (err) {
@@ -94,7 +88,7 @@ const ReportModal = ({
       className="fixed inset-0 bg-black flex items-center justify-center z-50 p-4"
       style={{ backgroundColor: "rgba(0, 0, 0, 0.8)" }}
     >
-      <div className="bg-white rounded-lg w-full max-w-md mx-auto max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-lg w-full max-w-md mx-auto max-h-[90vh]">
         <div className="flex items-center justify-between p-6">
           <div className="w-5"></div>
           <h3 className="font-bold">報告書</h3>
@@ -181,7 +175,7 @@ const ReportModal = ({
               />
             </button>
             {isPersonDropdownOpen && (
-              <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
+              <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 max-h-48 overflow-y-auto">
                 {personOptions.map((option) => (
                   <button
                     key={option}

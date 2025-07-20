@@ -34,7 +34,7 @@ const PhotoModal = ({ isOpen, onClose, uploadedPhotos, setUploadedPhotos }: Phot
             </button>
           </div>
         </div>
-        
+                
         {/* 写真グリッド */}
         <div className="flex-1 overflow-y-auto p-4">
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -53,16 +53,26 @@ const PhotoModal = ({ isOpen, onClose, uploadedPhotos, setUploadedPhotos }: Phot
             </div>
           )}
         </div>
-        
+                
         {/* フッター */}
         <div className="p-4 border-t bg-gray-50 flex justify-between items-center">
-          <div className="text-sm text-gray-600">
-            合計: {uploadedPhotos.length}枚 • {(uploadedPhotos.reduce((sum, photo) => sum + photo.size, 0) / 1024 / 1024).toFixed(1)}MB
+          <div className="flex items-center space-x-4">
+            <div className="text-sm text-gray-600">
+              合計: {uploadedPhotos.length}枚 • {(uploadedPhotos.reduce((sum, photo) => sum + photo.size, 0) / 1024 / 1024).toFixed(1)}MB
+            </div>
           </div>
-          <label className="bg-cyan-600 text-white px-4 py-2 rounded-lg">
+          <div className='flex gap-2'>
+          <label className="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-lg cursor-pointer transition-colors">
             写真を追加
             <input type="file" multiple accept="image/*" onChange={handlePhotoUpload} className="hidden" />
           </label>
+                      <button 
+              onClick={onClose} 
+              className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
+            >
+              <span>戻る</span>
+            </button>
+            </div>
         </div>
       </div>
     </div>

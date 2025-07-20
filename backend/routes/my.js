@@ -79,23 +79,30 @@ module.exports = (connection) => {
   // データ更新
   // PUT /my/user/1
   router.put("/:type/:id", (req, res) => {
+     console.log("🔥 PUT エンドポイント呼び出し");
+  console.log("🔥 type:", req.params.type);
+  console.log("🔥 id:", req.params.id);
+  console.log("🔥 body:", req.body);
+
     const type = req.params.type;
     const id = Number(req.params.id);
+    const data = req.body;
 
-    let params;
+    if (!isValidType(type)) {
+    console.error("❌ 無効なテーブル名:", type);
+    return res.status(400).send("Invalid table name");
+  }
+
     try {
-      params = paramsBuilder(type, req.body, id);
-    } catch (err) {
-      return res.status(400).send(err.message);
-    }
+      console.log("🔥 paramsBuilder呼び出し");
+      params = paramsBuilder(type, data, id);
+      console.log("🔥 params:", params);
 
-    handleQuery({
-      type,
-      key: "update",
-      params,
-      res,
-      connection,
-    });
+    handleQuery({ type, key: "update", params, res, connection });
+  } catch (error) {
+    console.error("❌ paramsBuilderエラー:", error);
+    return res.status(400).send(`Missing required fields for ${type}`);
+  }
   });
 
   // データ削除
@@ -135,7 +142,47 @@ module.exports = (connection) => {
 };
 
 function paramsBuilder(type, data, id = null) {
+  console.log("=== 🔍 paramsBuilder デバッグ ===");
+  console.log("📋 type:", type);
+  console.log("📊 data:", data);
+  console.log("🆔 id:", id);
+  console.log("📊 data keys:", Object.keys(data || {}));
+  
   switch (type) {
+    case "cleaning_report":
+      console.log("🔍 cleaning_report 処理開始");
+      
+      // 🔥 各フィールドの存在確認
+      console.log("📋 user_id:", data.user_id, "(type:", typeof data.user_id, ")");
+      console.log("📋 sub_user_id:", data.sub_user_id, "(type:", typeof data.sub_user_id, ")");
+      console.log("📋 type_id:", data.type_id, "(type:", typeof data.type_id, ")");
+      console.log("📋 area_id:", data.area_id, "(type:", typeof data.area_id, ")");
+      console.log("📋 start_datetime:", data.start_datetime, "(type:", typeof data.start_datetime, ")");
+      console.log("📋 end_datetime:", data.end_datetime, "(type:", typeof data.end_datetime, ")");
+      console.log("📋 status:", data.status, "(type:", typeof data.status, ")");
+      
+      // 🔥 必須フィールドチェック（修正版）
+      const requiredFields = ['user_id', 'type_id', 'area_id', 'start_datetime', 'end_datetime', 'status'];
+      const missingFields = [];
+      
+      for (const field of requiredFields) {
+        if (data[field] === undefined || data[field] === null) {
+          missingFields.push(field);
+        }
+      }
+      
+      if (missingFields.length > 0) {
+        console.error("❌ Missing fields:", missingFields);
+        console.error("❌ Received data:", data);
+        throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
+      }
+      
+      console.log("✅ cleaning_report フィールドチェック完了");
+      
+      return id 
+        ? [data.user_id, data.sub_user_id, data.type_id, data.area_id, data.start_datetime, data.end_datetime, data.status, id]
+        : [data.user_id, data.sub_user_id, data.type_id, data.area_id, data.start_datetime, data.end_datetime, data.status];
+
     case "user":
       if (
         !data.first_name ||
@@ -181,20 +228,6 @@ function paramsBuilder(type, data, id = null) {
       }
       return id ? [data.spot_id, data.item, id] : [data.spot_id, data.item];
 
-    case "cleaning_report":
-      if (
-        !data.user_id ||
-        !data.type_id ||
-        !data.area_id ||
-        !data.start_datetime ||
-        !data.end_datetime ||
-        typeof data.status !== "boolean"
-      ) {
-        throw new Error("Missing required fields for cleaning_report");
-      }
-      return id
-        ? [data.user_id, data.sub_user_id, data.type_id, data.area_id, data.start_datetime, data.end_datetime, data.status, id]
-        : [data.user_id, data.sub_user_id, data.type_id, data.area_id, data.start_datetime, data.end_datetime, data.status];
 
     case "photo":
       if (!data.report_id || !data.photo_url || !data.posted_datetime) {
@@ -212,31 +245,48 @@ function paramsBuilder(type, data, id = null) {
         ? [data.task_name, data.required_time, id] 
         : [data.report_id, data.task_name, data.required_time];
 
-    default:
-      throw new Error("Unsupported type for param building");
+      default:
+      throw new Error(`Unknown type: ${type}`);
   }
 }
 
 function handleQuery({ type, key, params = [], res, connection }) {
-  // typeが有効の物かどうか
   if (!isValidType(type)) return res.status(400).send("Invalid table name");
 
   const sql = getSQL(type, key);
-  // 指定されたSQLがあるかどうか
   if (!sql) return res.status(500).send("SQL Not Found");
+
+  // 🔥 デバッグログ追加
+  console.log("=== 🔍 サーバーサイドデバッグ ===");
+  console.log("📋 type:", type);
+  console.log("🔑 key:", key);
+  console.log("📝 生成されたSQL:", sql);
+  console.log("📊 params:", params);
+  console.log("📊 params型:", params.map(p => typeof p));
+  console.log("================================");
 
   connection.query(sql, params, (err, result) => {
     if (err) {
-      console.error(err);
-      return res.status(500).send("DB error");
+      console.error("❌ MySQL詳細エラー:");
+      console.error("エラーコード:", err.code);
+      console.error("エラー番号:", err.errno);
+      console.error("SQLState:", err.sqlState);
+      console.error("SQLメッセージ:", err.sqlMessage);
+      console.error("SQL文:", err.sql);
+      console.error("完全なエラーオブジェクト:", err);
+      
+      return res.status(500).send(`DB error: ${err.code} - ${err.sqlMessage}`);
     }
 
     if (key.startsWith("select")) {
       res.json(result);
     } else if (key === "insert") {
+      console.log("✅ INSERT成功 - insertedId:", result.insertId);
       res.status(201).json({ insertedId: result.insertId });
     } else {
-      res.sendStatus(200);
+      console.log("✅ UPDATE/DELETE成功 - affectedRows:", result.affectedRows);
+  res.status(200).json({ success: true, affectedRows: result.affectedRows });
     }
   });
 }
+
