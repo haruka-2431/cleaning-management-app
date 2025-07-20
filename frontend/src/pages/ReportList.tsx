@@ -226,7 +226,7 @@ const Reportlist = () => {
         className="fixed top-0 left-0 right-0 z-50"
       />
 
-      <div className="container mx-auto px-4 py-6 lg:pt-30">
+      <div className="container mx-auto px-4 py-6 lg:mt-3">
         <div
           role="tablist"
           className="tabs tabs-lift w-full sticky top-28 sm:top-28 lg:top-32 bg-white z-40"
