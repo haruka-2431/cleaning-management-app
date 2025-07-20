@@ -29,7 +29,7 @@ export interface Report {
 // タブの型定義
 export type TabType = "unconfirmed" | "confirmed";
 
-const ReportList = () => {
+const Reportlist = () => {
   const nav = useNavigate();
   const [activeTab, setActiveTab] = useState<TabType>("unconfirmed");
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
@@ -306,4 +306,4 @@ const ReportList = () => {
   );
 };
 
-export default ReportList;
+export default Reportlist;
