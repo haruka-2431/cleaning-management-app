@@ -1,13 +1,21 @@
-import { EditConfig, ContentEditModalProps, ChecklistItem } from "../EditTypeConfig"
+import {
+  EditConfig,
+  ContentEditModalProps,
+  ChecklistItem,
+} from "../EditTypeConfig";
 import { ChecklistHeaderProps } from "../EditConfig";
 import { ChecklistSelects } from "../../components/ChecklistSelects";
 
-export const checklistConfig: EditConfig<ChecklistItem, ContentEditModalProps, ChecklistHeaderProps> = {
+export const ChecklistConfig: EditConfig<
+  ChecklistItem,
+  ContentEditModalProps,
+  ChecklistHeaderProps
+> = {
   title: "チェックリスト",
   header: (onModalOpen, extraProps) => {
-    if(!extraProps) return null;
+    if (!extraProps) return null;
 
-    const{ selectedSpotID, setSelectedSpotID } = extraProps;
+    const { selectedSpotID, setSelectedSpotID } = extraProps;
 
     return (
       <ChecklistSelects
@@ -39,7 +47,7 @@ export const checklistConfig: EditConfig<ChecklistItem, ContentEditModalProps, C
     </>
   ),
   modals: {
-    add: (props) => (
+    add: (props: ContentEditModalProps) => (
       <div className="mt-12.5 mb-25 w-55">
         <p className="px-1 py-2 text-sm text-gray-700">追加項目</p>
         <div className="p-[2px] border rounded-lg border-gray-500">
@@ -79,7 +87,7 @@ export const checklistConfig: EditConfig<ChecklistItem, ContentEditModalProps, C
         </div>
       </div>
     ),
-    update: (props) => (
+    update: (props: ContentEditModalProps) => (
       <div className="mt-7.5 mb-15 w-55">
         <div>
           <p className="py-2 text-xs text-gray-700">変更前</p>
@@ -94,8 +102,19 @@ export const checklistConfig: EditConfig<ChecklistItem, ContentEditModalProps, C
           </p>
         </div>
         <div className="mt-6 mb-1 flex justify-center text-black">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M3 7.5 7.5 3m0 0L12 7.5M7.5 3v13.5m13.5 0L16.5 21m0 0L12 16.5m4.5 4.5V7.5" />
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={1.5}
+            stroke="currentColor"
+            className="size-6"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M3 7.5 7.5 3m0 0L12 7.5M7.5 3v13.5m13.5 0L16.5 21m0 0L12 16.5m4.5 4.5V7.5"
+            />
           </svg>
         </div>
         <div>
@@ -136,7 +155,7 @@ export const checklistConfig: EditConfig<ChecklistItem, ContentEditModalProps, C
         </div>
       </div>
     ),
-    delete: (props) => (
+    delete: (props: ContentEditModalProps) => (
       <div className="mt-12.5 mb-25 w-55">
         <p className="px-1 py-2 text-sm text-gray-700">削除項目</p>
         <div className="p-[2px] border rounded-lg border-gray-500">
@@ -151,6 +170,6 @@ export const checklistConfig: EditConfig<ChecklistItem, ContentEditModalProps, C
           </p>
         </div>
       </div>
-    )
-  }
+    ),
+  },
 };

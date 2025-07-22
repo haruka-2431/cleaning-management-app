@@ -1,5 +1,9 @@
-import { ArrowDownTrayIcon, CheckIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import { Report } from "../pages/ReportList"; 
+import {
+  ArrowDownTrayIcon,
+  CheckIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/outline";
+import { Report } from "../pages/Reportlist";
 
 interface ReportDetailModalProps {
   selectedReport: Report | null;
@@ -7,9 +11,13 @@ interface ReportDetailModalProps {
   onConfirm: () => void;
 }
 
-const ReportDetailModal = ({ selectedReport, onClose, onConfirm }: ReportDetailModalProps) => {
+const ReportDetailModal = ({
+  selectedReport,
+  onClose,
+  onConfirm,
+}: ReportDetailModalProps) => {
   if (!selectedReport) {
-    return null; 
+    return null;
   }
 
   // サンプル写真のダミーデータ
@@ -40,22 +48,46 @@ const ReportDetailModal = ({ selectedReport, onClose, onConfirm }: ReportDetailM
             <table className="w-full border-collapse border border-gray-300 hidden lg:table">
               <tbody>
                 <tr className="border-b border-gray-300">
-                  <td className="bg-gray-100 p-2 lg:p-3 font-medium text-xs lg:text-sm border-r border-gray-300 w-1/4">担当者</td>
-                  <td className="p-2 lg:p-3 text-xs lg:text-sm border-r border-gray-300 w-1/4">{selectedReport.user}</td>
-                  <td className="bg-gray-100 p-2 lg:p-3 font-medium text-xs lg:text-sm border-r border-gray-300 w-1/4">清掃場所</td>
-                  <td className="p-2 lg:p-3 text-xs lg:text-sm w-1/4">{selectedReport.area}</td>
+                  <td className="bg-gray-100 p-2 lg:p-3 font-medium text-xs lg:text-sm border-r border-gray-300 w-1/4">
+                    担当者
+                  </td>
+                  <td className="p-2 lg:p-3 text-xs lg:text-sm border-r border-gray-300 w-1/4">
+                    {selectedReport.user}
+                  </td>
+                  <td className="bg-gray-100 p-2 lg:p-3 font-medium text-xs lg:text-sm border-r border-gray-300 w-1/4">
+                    清掃場所
+                  </td>
+                  <td className="p-2 lg:p-3 text-xs lg:text-sm w-1/4">
+                    {selectedReport.area}
+                  </td>
                 </tr>
                 <tr className="border-b border-gray-300">
-                  <td className="bg-gray-100 p-2 lg:p-3 font-medium text-xs lg:text-sm border-r border-gray-300">追加担当者</td>
-                  <td className="p-2 lg:p-3 text-xs lg:text-sm border-r border-gray-300">{selectedReport.subUser || "-"}</td>
-                  <td className="bg-gray-100 p-2 lg:p-3 font-medium text-xs lg:text-sm border-r border-gray-300">作業開始日時</td>
-                  <td className="p-2 lg:p-3 text-xs lg:text-sm font-mono">{selectedReport.startDatetime}</td>
+                  <td className="bg-gray-100 p-2 lg:p-3 font-medium text-xs lg:text-sm border-r border-gray-300">
+                    追加担当者
+                  </td>
+                  <td className="p-2 lg:p-3 text-xs lg:text-sm border-r border-gray-300">
+                    {selectedReport.subUser || "-"}
+                  </td>
+                  <td className="bg-gray-100 p-2 lg:p-3 font-medium text-xs lg:text-sm border-r border-gray-300">
+                    作業開始日時
+                  </td>
+                  <td className="p-2 lg:p-3 text-xs lg:text-sm font-mono">
+                    {selectedReport.startDatetime}
+                  </td>
                 </tr>
                 <tr>
-                  <td className="bg-gray-100 p-2 lg:p-3 font-medium text-xs lg:text-sm border-r border-gray-300">清掃タイプ</td>
-                  <td className="p-2 lg:p-3 text-xs lg:text-sm border-r border-gray-300">{selectedReport.type}</td>
-                  <td className="bg-gray-100 p-2 lg:p-3 font-medium text-xs lg:text-sm border-r border-gray-300">作業終了日時</td>
-                  <td className="p-2 lg:p-3 text-xs lg:text-sm font-mono">{selectedReport.endDatetime}</td>
+                  <td className="bg-gray-100 p-2 lg:p-3 font-medium text-xs lg:text-sm border-r border-gray-300">
+                    清掃タイプ
+                  </td>
+                  <td className="p-2 lg:p-3 text-xs lg:text-sm border-r border-gray-300">
+                    {selectedReport.type}
+                  </td>
+                  <td className="bg-gray-100 p-2 lg:p-3 font-medium text-xs lg:text-sm border-r border-gray-300">
+                    作業終了日時
+                  </td>
+                  <td className="p-2 lg:p-3 text-xs lg:text-sm font-mono">
+                    {selectedReport.endDatetime}
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -64,28 +96,46 @@ const ReportDetailModal = ({ selectedReport, onClose, onConfirm }: ReportDetailM
             <table className="w-full border-collapse border border-gray-300 lg:hidden">
               <tbody>
                 <tr className="border-b border-gray-300">
-                  <td className="bg-gray-100 p-2 font-medium text-xs border-r border-gray-300 w-1/2">担当者</td>
+                  <td className="bg-gray-100 p-2 font-medium text-xs border-r border-gray-300 w-1/2">
+                    担当者
+                  </td>
                   <td className="p-2 text-xs w-1/2">{selectedReport.user}</td>
                 </tr>
                 <tr className="border-b border-gray-300">
-                  <td className="bg-gray-100 p-2 font-medium text-xs border-r border-gray-300 w-1/2">追加担当者</td>
-                  <td className="p-2 text-xs w-1/2">{selectedReport.subUser || "-"}</td>
+                  <td className="bg-gray-100 p-2 font-medium text-xs border-r border-gray-300 w-1/2">
+                    追加担当者
+                  </td>
+                  <td className="p-2 text-xs w-1/2">
+                    {selectedReport.subUser || "-"}
+                  </td>
                 </tr>
                 <tr className="border-b border-gray-300">
-                  <td className="bg-gray-100 p-2 font-medium text-xs border-r border-gray-300 w-1/2">清掃タイプ</td>
+                  <td className="bg-gray-100 p-2 font-medium text-xs border-r border-gray-300 w-1/2">
+                    清掃タイプ
+                  </td>
                   <td className="p-2 text-xs w-1/2">{selectedReport.type}</td>
                 </tr>
                 <tr className="border-b border-gray-300">
-                  <td className="bg-gray-100 p-2 font-medium text-xs border-r border-gray-300 w-1/2">清掃場所</td>
+                  <td className="bg-gray-100 p-2 font-medium text-xs border-r border-gray-300 w-1/2">
+                    清掃場所
+                  </td>
                   <td className="p-2 text-xs w-1/2">{selectedReport.area}</td>
                 </tr>
                 <tr className="border-b border-gray-300">
-                  <td className="bg-gray-100 p-2 font-medium text-xs border-r border-gray-300 w-1/2">作業開始日時</td>
-                  <td className="p-2 text-xs w-1/2 font-mono">{selectedReport.startDatetime}</td>
+                  <td className="bg-gray-100 p-2 font-medium text-xs border-r border-gray-300 w-1/2">
+                    作業開始日時
+                  </td>
+                  <td className="p-2 text-xs w-1/2 font-mono">
+                    {selectedReport.startDatetime}
+                  </td>
                 </tr>
                 <tr>
-                  <td className="bg-gray-100 p-2 font-medium text-xs border-r border-gray-300 w-1/2">作業終了日時</td>
-                  <td className="p-2 text-xs w-1/2 font-mono">{selectedReport.endDatetime}</td>
+                  <td className="bg-gray-100 p-2 font-medium text-xs border-r border-gray-300 w-1/2">
+                    作業終了日時
+                  </td>
+                  <td className="p-2 text-xs w-1/2 font-mono">
+                    {selectedReport.endDatetime}
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -108,7 +158,7 @@ const ReportDetailModal = ({ selectedReport, onClose, onConfirm }: ReportDetailM
               ))}
             </div>
           </div>
-          
+
           {/* アクションボタン */}
           <div className="p-4 lg:p-6 space-y-3">
             <button className="btn bg-cyan-800 text-white w-full gap-2 h-12 lg:h-14 text-sm lg:text-base">
@@ -119,7 +169,9 @@ const ReportDetailModal = ({ selectedReport, onClose, onConfirm }: ReportDetailM
             {selectedReport.status ? (
               <div className="flex items-center justify-center gap-2 py-3 lg:py-4 bg-teal-50 border border-teal-200 rounded-lg">
                 <CheckIcon className="w-5 h-5 lg:w-6 lg:h-6 text-teal-600" />
-                <span className="text-teal-600 font-medium text-sm lg:text-base">確認済み</span>
+                <span className="text-teal-600 font-medium text-sm lg:text-base">
+                  確認済み
+                </span>
               </div>
             ) : (
               <button
