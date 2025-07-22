@@ -12,7 +12,7 @@ module.exports = {
     INSERT INTO checklist (id, spot_id, item) VALUES (null, ?, ?);
   `,
   update: `
-    UPDATE checklist SET item = ? WHERE id = ?;
+    UPDATE checklist SET spot_id = ?, item = ? WHERE id = ?;
   `,
   delete: `
     DELETE FROM checklist WHERE id = ?;

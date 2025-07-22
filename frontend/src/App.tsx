@@ -1,77 +1,20 @@
 import "./css/style.css";
 import { useState } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider } from "./contexts/AuthContext";
 
-import ProtectedRoute from "./components/ProtectedRoute";
-import OpeningAnimation from "./pages/Opening";
-
-import ManagerSelect from "./pages/ManagerSelect";
-import CleanSelect from "./pages/CleanSelect";
-import CheckList from "./pages/CheckList";
-
-import ReportList from "./pages/ReportList";
 import CleaningEdit from "./pages/CleaningEdit";
 import List from "./pages/List";
 
 const App = () => {
   const [title, setTitle] = useState<string>("");
-  const [isAppInitialized, setIsAppInitialized] = useState(false);
-
-  // 初回のみ表示
-  if(!isAppInitialized){
-    return <OpeningAnimation onComplete={() => setIsAppInitialized(true)}/>
-  }
-
   return (
-    <AuthProvider>
-      <Router>
-        <Routes>
-          <Route path="/" element={<Navigate to="/manager-select" />}/>
-          <Route path="/manager-select" element={<ManagerSelect />}/>
-          <Route
-            path="/worker"
-            element={
-              <ProtectedRoute allowedRoles={["worker"]}>
-                <CleanSelect />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/worker/checklist"
-            element={
-              <ProtectedRoute allowedRoles={["worker"]}>
-                <CheckList />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin" element={
-              <ProtectedRoute allowedRoles={["admin"]}>
-                <ReportList />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/adimn/cleaning-edit"
-            element={
-              <ProtectedRoute allowedRoles={["admin"]}>
-                <CleaningEdit title={title} setTitle={setTitle}/>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/cleaning-edit/:type"
-            element={
-              <ProtectedRoute allowedRoles={["admin"]}>
-                <List title={title} setTitle={setTitle}/>
-              </ProtectedRoute>
-            }
-          />
-          <Route path="*" element={<Navigate to="/manager-select" replace />} />
-        </Routes>
-      </Router>
-    </AuthProvider>
+    <Router>
+      <Routes>
+        <Route path="/" element={<Navigate to="/admin" />}/>
+        <Route path="/admin" element={<CleaningEdit title={title} setTitle={setTitle} />} />
+        <Route path="/admin/:type" element={<List title={title} setTitle={setTitle} />} />
+      </Routes>
+    </Router>
   );
 };
 

@@ -1,6 +1,6 @@
 import { forwardRef, useImperativeHandle, useRef, useState } from "react";
-import { EditModalHandle, EditModalProps, LayoutType, RendererEditModalProps } from "../configs/EditTypeConfig";
-import { editConfig } from "../configs/EditConfig";
+import { EditModalHandle, EditModalProps, LayoutType, RendererEditModalProps } from "../configs/EditTypeDefinitions";
+import { editConfig } from "../configs/EditTypeConfig";
 
 const EditModal = forwardRef<EditModalHandle, EditModalProps>((props, ref) => {
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -81,7 +81,7 @@ const EditModal = forwardRef<EditModalHandle, EditModalProps>((props, ref) => {
               className="btn btn-sm absolute bottom-6 right-6 bg-sky-800 rounded-lg border-cyan-800 text-sm text-white"
               onClick={() => {
                 if(layoutType === "add") props.addItem(inputValue);
-                if(layoutType === "update") props.editItem(inputValue, selectID);
+                if(layoutType === "update" || layoutType === "authentication") props.editItem(inputValue, selectID, layoutType);
                 if(layoutType === "delete") props.deleteItem(selectID);
                 props.onModalClose();
               }}

@@ -64,10 +64,10 @@ module.exports = (connection) => {
     });
   });
 
-  router.put("/:type/:id", (req, res) => {
+  router.put("/:type/:action/:id", (req, res) => {
     const type = req.params.type;
+    const key = req.params.action;
     const id = Number(req.params.id);
-
 
     let params;
     try{
@@ -78,7 +78,7 @@ module.exports = (connection) => {
 
     handleQuery({
       type,
-      key: "update",
+      key,
       params,
       res,
       connection
@@ -103,10 +103,16 @@ module.exports = (connection) => {
   function paramsBuilder(type, data, id = null){
     switch(type){
       case "user":
-        if (!data.first_name || !data.last_name || !data.email || !data.position){
+        if(data.status){
+          const verified = data.status === "1" ? true : false;
+          return [!verified, id];
+        }
+
+        if (!data.last_name || !data.first_name || !data.email || !data.position){
           throw new Error("Missing required fields for user");
         }
-        const userParams = [data.first_name, data.last_name, data.email, data.position];
+        
+        const userParams = [data.last_name, data.first_name, data.email, data.position];
         return id ? [...userParams, id] : userParams;
 
       case "cleaning_type":
@@ -119,7 +125,7 @@ module.exports = (connection) => {
         if (!data.type_id || !data.area_name){
           throw new Error("Missing required fields for cleaning_area");
         }
-        return id ? [data.area_name, id] : [data.type_id, data.area_name];
+        return id ? [data.type_id, data.area_name, id] : [data.type_id, data.area_name];
 
       case "checklist":
         if (
