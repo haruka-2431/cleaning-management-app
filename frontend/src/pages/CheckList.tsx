@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import Header from "../components/Header";
-import { getTemplateByTypeAndLocation } from "../components/ChecklistItem";
+import { getTemplateByTypeAndLocation } from "../components/CheckListItem";
 import { PlusIcon } from "@heroicons/react/24/outline";
-import ChecklistSection from "../components/ChecklistSection";
+import ChecklistSection from "../components/CheckListSection";
 import ReportModal from "../components/ReportModal";
 import CompletedScreen from "../components/CompletedScreen";
 

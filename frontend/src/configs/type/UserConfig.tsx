@@ -1,5 +1,5 @@
 import { EditConfig, ContentEditModalProps, UserItem } from "../EditTypeDefinitions"
-import { FormField } from "../../components/FormField";
+import { FormField } from "../../components/modal/FormField";
 
 export const userConfig: EditConfig<UserItem, ContentEditModalProps> = {
   title: "個人データ",

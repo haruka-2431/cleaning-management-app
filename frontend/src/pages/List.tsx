@@ -4,7 +4,7 @@ import { useParams } from "react-router-dom";
 import Header from "../components/Header";
 import ListHeader from "../components/ListHeader";
 import ListBody from "../components/ListBody";
-import EditModal from "../components/EditModal";
+import EditModal from "../components/modal/EditModal";
 
 import { editConfig } from "../configs/EditTypeConfig";
 import { ItemMap, EditConfig ,EditConfigKey, OnModalOpen, EditModalHandle } from "../configs/EditTypeDefinitions";
