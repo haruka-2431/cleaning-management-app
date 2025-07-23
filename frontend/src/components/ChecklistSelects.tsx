@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { CleaningAreaItem, LayoutType } from "../configs/EditTypeConfig";
+import { CleaningAreaItem, LayoutType } from "../configs/EditTypeDefinitions";
 import { API_EDIT } from "../pages/List";
 
 type CleaningLocation = { id: number; location: string };
