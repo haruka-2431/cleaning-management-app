@@ -1,5 +1,3 @@
-// data/sql/cleaning_report.js の正しい内容
-
 module.exports = {
   select_all: `
     SELECT 
