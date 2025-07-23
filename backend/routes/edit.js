@@ -6,7 +6,7 @@ const ALLOWED_TYPE = [
   "cleaning_type",
   "cleaning_area",
   "cleaning_spot",
-  "checklist",
+  "Checklist",
   "cleaning_report",
 ];
 
@@ -21,7 +21,7 @@ module.exports = (connection) => {
     const { type, action, id } = req.params;
     const validActions = ["select_spot"];
 
-    if(!validActions.includes(action)){
+    if (!validActions.includes(action)) {
       return res.status(400).json({ error: "Invalid action" });
     }
 
@@ -30,7 +30,7 @@ module.exports = (connection) => {
       key: action,
       params: [Number(id)],
       res,
-      connection
+      connection,
     });
   });
 
@@ -40,7 +40,7 @@ module.exports = (connection) => {
       type,
       key: "select_all",
       res,
-      connection
+      connection,
     });
   });
 
@@ -48,10 +48,9 @@ module.exports = (connection) => {
     const type = req.params.type;
 
     let params;
-    try{
+    try {
       params = paramsBuilder(type, req.body);
-    }catch(err){
-      
+    } catch (err) {
       return res.status(400).send(err.message);
     }
 
@@ -60,7 +59,7 @@ module.exports = (connection) => {
       key: "insert",
       params,
       res,
-      connection
+      connection,
     });
   });
 
@@ -70,9 +69,9 @@ module.exports = (connection) => {
     const id = Number(req.params.id);
 
     let params;
-    try{
+    try {
       params = paramsBuilder(type, req.body, id);
-    }catch(err){
+    } catch (err) {
       return res.status(400).send(err.message);
     }
 
@@ -81,7 +80,7 @@ module.exports = (connection) => {
       key,
       params,
       res,
-      connection
+      connection,
     });
   });
 
@@ -93,12 +92,12 @@ module.exports = (connection) => {
       key: "delete",
       params: [id],
       res,
-      connection
+      connection,
     });
   });
 
-    return router;
-  };
+  return router;
+};
 
   function paramsBuilder(type, data, id = null){
     switch(type){
@@ -115,11 +114,11 @@ module.exports = (connection) => {
         const userParams = [data.last_name, data.first_name, data.email, data.position];
         return id ? [...userParams, id] : userParams;
 
-      case "cleaning_type":
-        if (!data.type_name){
-          throw new Error("Missing required field 'type_name' for cleaning_type");
-        }
-        return id ? [data.type_name, id] : [data.type_name];
+    case "cleaning_type":
+      if (!data.type_name) {
+        throw new Error("Missing required field 'type_name' for cleaning_type");
+      }
+      return id ? [data.type_name, id] : [data.type_name];
 
       case "cleaning_area":
         if (!data.type_id || !data.area_name){
@@ -127,44 +126,41 @@ module.exports = (connection) => {
         }
         return id ? [data.type_id, data.area_name, id] : [data.type_id, data.area_name];
 
-      case "checklist":
-        if (
-          typeof data.spot_id !== "number" ||
-          typeof data.item !== "string" ||
-          !data.item.trim()
-        ){
-          throw new Error("Missing or invalid fields for checklist");
-        }
-        return id
-          ? [data.spot_id, data.item, id]
-          : [data.spot_id, data.item];
+    case "Checklist":
+      if (
+        typeof data.spot_id !== "number" ||
+        typeof data.item !== "string" ||
+        !data.item.trim()
+      ) {
+        throw new Error("Missing or invalid fields for Checklist");
+      }
+      return id ? [data.spot_id, data.item, id] : [data.spot_id, data.item];
 
-      default:
-        throw new Error("Unsupported type for param building");
-    }
+    default:
+      throw new Error("Unsupported type for param building");
   }
+}
 
-  function handleQuery({ type, key, params = [], res, connection }) {
-    //typeが有効の物かどうか
-    if(!isValidType(type)) return res.status(400).send("Invalid table name");
+function handleQuery({ type, key, params = [], res, connection }) {
+  //typeが有効の物かどうか
+  if (!isValidType(type)) return res.status(400).send("Invalid table name");
 
-    const sql = getSQL(type, key);
-    //指定されたSQLがあるかどうか
-    if(!sql) return res.status(500).send("SQL Not Found");
+  const sql = getSQL(type, key);
+  //指定されたSQLがあるかどうか
+  if (!sql) return res.status(500).send("SQL Not Found");
 
+  connection.query(sql, params, (err, result) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).send("DB error");
+    }
 
-    connection.query(sql, params, (err, result) => {
-      if (err) {
-        console.error(err);
-        return res.status(500).send("DB error");
-      }
-
-      if (key.startsWith("select")) {
-        res.json(result);
-      } else if (key === "insert") {
-        res.status(201).json({ insertedId: result.insertId });
-      } else {
-        res.sendStatus(200);
-      }
+    if (key.startsWith("select")) {
+      res.json(result);
+    } else if (key === "insert") {
+      res.status(201).json({ insertedId: result.insertId });
+    } else {
+      res.sendStatus(200);
+    }
   });
 }

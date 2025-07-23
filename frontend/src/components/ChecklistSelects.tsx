@@ -47,9 +47,13 @@ export const ChecklistSelects = ({
         <select
           className="w-50 lg:w-100 border rounded border-gray-300 select-xs"
           value={selectedAreaID}
-          onChange={(e) => setSelectAreaID(e.target.value ? Number(e.target.value) : "")}
+          onChange={(e) =>
+            setSelectAreaID(e.target.value ? Number(e.target.value) : "")
+          }
         >
-          <option disabled value="">清掃場所を選択してください</option>
+          <option disabled value="">
+            清掃場所を選択してください
+          </option>
           {areaList.map((area) => (
             <option key={area.id} value={area.id}>
               {area.area_name}
@@ -60,10 +64,14 @@ export const ChecklistSelects = ({
           className="w-50 lg:w-100 border rounded border-gray-300 select-xs"
           disabled={!selectedAreaID}
           value={selectedSpotID}
-          onChange={(e) => setSelectedSpotID(e.target.value ? Number(e.target.value) : "")}
+          onChange={(e) =>
+            setSelectedSpotID(e.target.value ? Number(e.target.value) : "")
+          }
         >
           <option disabled value="">
-            {selectedAreaID ? "清掃箇所を選択してください" : "先に清掃場所を選択してください"}
+            {selectedAreaID
+              ? "清掃箇所を選択してください"
+              : "先に清掃場所を選択してください"}
           </option>
           {locationList.map((location) => (
             <option key={location.id} value={location.id}>

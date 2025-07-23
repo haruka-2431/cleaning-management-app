@@ -1,9 +1,10 @@
+
 import { ChecklistItem, CleaningAreaItem, CleaningTypeItem, ContentEditModalProps, EditConfig, UserItem } from "./EditTypeDefinitions";
 
 import { userConfig } from "./type/UserConfig";
 import { cleaningTypeConfig } from "./type/CleaningTypeConfig";
 import { cleaningAreaConfig } from "./type/CleaningAreaConfig";
-import { checklistConfig } from "./type/ChecklistConfig";
+import { ChecklistConfig } from "./type/ChecklistConfig";
 
 export type ChecklistHeaderProps = {
   selectedSpotID: number | "";
@@ -21,5 +22,5 @@ export const editConfig: EditItemMap = {
   user: userConfig,
   cleaning_type: cleaningTypeConfig,
   cleaning_area: cleaningAreaConfig,
-  checklist: checklistConfig
+  checklist: ChecklistConfig
 };

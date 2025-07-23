@@ -1,3 +1,5 @@
+export const MY_API_URL = "http://localhost:3000/another";
+
 // チェックリストテンプレートの型定義
 interface ChecklistTemplate {
   title: string;
@@ -6,12 +8,106 @@ interface ChecklistTemplate {
   };
 }
 
-// チェックリストテンプレート集合の型定義
-interface ChecklistTemplates {
-  [key: string]: ChecklistTemplate;
+// DB関連の型定義
+interface CleaningArea {
+  id: number;
+  type_name: string;
+  area_name: string;
 }
 
-export const checklistTemplates: ChecklistTemplates = {
+interface CleaningSpot {
+  id: number;
+  area_id: number;
+  location: string;
+}
+
+interface ChecklistItem {
+  id: number;
+  spot_id: number;
+  item: string;
+}
+
+// ← DBからエリアID取得（修正版）
+export const getAreaIdByName = async (typeName: string, areaName: string): Promise<number | null> => {
+  try {
+    console.log("エリアID取得開始:", typeName, areaName);
+    
+    const response = await fetch(`${MY_API_URL}/cleaning_area`);
+    const data: CleaningArea[] = await response.json();
+    
+    console.log("cleaning_area データ:", data);
+    
+    // 配列を直接処理
+    if (!data || !Array.isArray(data)) {
+      console.error("不正なcleaning_areaデータ:", data);
+      return null;
+    }
+    
+    const targetArea = data.find((area: CleaningArea) => 
+      area.type_name === typeName && area.area_name === areaName
+    );
+    
+    console.log("該当エリア:", targetArea);
+    return targetArea ? targetArea.id : null;
+    
+  } catch (err) {
+    console.error("エリアID取得エラー:", err);
+    return null;
+  }
+};
+
+// ← DBからチェックリスト取得（修正版）
+export const fetchChecklistTemplate = async (areaId: number): Promise<ChecklistTemplate> => {
+  try {
+    console.log("チェックリスト取得開始 areaId:", areaId);
+    
+    // Step 1: cleaning_spot 取得
+    const spotResponse = await fetch(`${MY_API_URL}/cleaning_spot`);
+    const spotData: CleaningSpot[] = await spotResponse.json();
+    console.log("cleaning_spot データ:", spotData);
+    
+    // Step 2: checklist 取得
+    const checklistResponse = await fetch(`${MY_API_URL}/checklist`);
+    const checklistData: ChecklistItem[] = await checklistResponse.json();
+    console.log("checklist データ:", checklistData);
+    
+    // Step 3: エリア名取得
+    const areaResponse = await fetch(`${MY_API_URL}/cleaning_area`);
+    const areaData: CleaningArea[] = await areaResponse.json();
+    const area = areaData.find((a: CleaningArea) => a.id === areaId);
+    
+    // Step 4: データ構築
+    const template: ChecklistTemplate = {
+      title: area ? area.area_name : "チェックリスト",
+      data: {}
+    };
+    
+    // 該当エリアのスポットを取得
+    const areaSpots = spotData.filter((spot: CleaningSpot) => spot.area_id === areaId);
+    console.log("該当エリアのスポット:", areaSpots);
+    
+    // 各スポットのチェックリスト項目を取得
+    areaSpots.forEach((spot: CleaningSpot) => {
+      const spotItems = checklistData
+        .filter((item: ChecklistItem) => item.spot_id === spot.id)
+        .map((item: ChecklistItem) => item.item);
+      
+      if (spotItems.length > 0) {
+        template.data[spot.location] = spotItems;
+      }
+    });
+    
+    console.log("構築されたテンプレート:", template);
+    return template;
+    
+  } catch (err) {
+    console.error("チェックリスト取得エラー:", err);
+    return { title: "エラー", data: {} };
+  }
+};
+
+// ← 静的データをフォールバック用に保持
+export const ChecklistTemplates: { [key: string]: ChecklistTemplate } = {
   tenjin: {
     title: "民泊清掃 - 天神 -",
     data: {
@@ -99,7 +195,7 @@ export const checklistTemplates: ChecklistTemplates = {
     data: {}, // チェックリストなし
   },
   harukichi: {
-    title: "民泊清掃 - 春吉 -",
+    title: "民泊清掃 - 春吉 -", 
     data: {
       全体のゴミ回収: [
         "全体のゴミ回収"
@@ -291,20 +387,36 @@ export const checklistTemplates: ChecklistTemplates = {
   },
 };
 
-// 選択された清掃タイプと場所に基づいてテンプレートを決定する関数
-export const getTemplateByTypeAndLocation = (type: string, location: string): string | null => {
-  if (type === "民泊清掃") {
-    if (location === "天神民泊") return "tenjin";
-    if (location === "春吉民泊") return "harukichi";
+// ← 新しい動的取得関数（修正版）
+export const getTemplateByTypeAndLocation = async (type: string, location: string): Promise<ChecklistTemplate> => {
+  try {
+    console.log("テンプレート取得開始:", type, location);
+    
+    // DBからエリアID取得
+    const areaId = await getAreaIdByName(type, location);
+    
+    if (areaId) {
+      // DBからチェックリスト取得
+      const template = await fetchChecklistTemplate(areaId);
+      console.log("DB取得成功:", template);
+      return template;
+    } else {
+      console.log("エリアIDが見つからない、フォールバック使用");
+      // フォールバック：静的データ使用
+      if (type === "民泊清掃") {
+        if (location === "天神民泊") return ChecklistTemplates.tenjin;
+        if (location === "春吉民泊") return ChecklistTemplates.harukichi;
+      }
+      if (type === "巡回清掃") return ChecklistTemplates.junkai;
+      if (type === "施設清掃") return ChecklistTemplates.shisetsu;
+      if (type === "ハウスクリーニング") return ChecklistTemplates.house;
+      
+      return ChecklistTemplates.tenjin; // デフォルト
+    }
+  } catch (err) {
+    console.error("テンプレート取得エラー:", err);
+    // エラー時は静的データにフォールバック
+    console.log("エラー時フォールバック使用");
+    return ChecklistTemplates.tenjin;
   }
-  if (type === "巡回清掃") {
-    return "junkai"; // 巡回清掃用の特別なテンプレート
-  }
-  if (type === "施設清掃") {
-    return "shisetsu";
-  }
-  if (type === "ハウスクリーニング") {
-    return "house";
-  }
-  return null;
 };

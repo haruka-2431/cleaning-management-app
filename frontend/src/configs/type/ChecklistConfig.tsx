@@ -4,7 +4,11 @@ import { ChecklistSelects } from "../../components/ChecklistHeader";
 import { ChecklistModalContent } from "../../components/ChecklistModalContent";
 import { FormField } from "../../components/FormField";
 
-export const checklistConfig: EditConfig<ChecklistItem, ContentEditModalProps, ChecklistHeaderProps> = {
+export const ChecklistConfig: EditConfig<
+  ChecklistItem,
+  ContentEditModalProps,
+  ChecklistHeaderProps
+> = {
   title: "チェックリスト",
   header: (onModalOpen, extraProps) => {
     if(!extraProps) return null;
@@ -58,6 +62,6 @@ export const checklistConfig: EditConfig<ChecklistItem, ContentEditModalProps, C
           )}
         </div>
       </div>
-    )
-  }
+    ),
+  },
 };
