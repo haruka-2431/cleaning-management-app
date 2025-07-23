@@ -15,7 +15,7 @@ const CleaningEdit = ({ title, setTitle }: CleaningEditProps) => {
   }, [setTitle]);
 
   const handleClick = (type: string) => {
-    nav(`/admin/${type}`);
+    nav(`/admin/cleaning-edit/${type}`);
   };
 
   return (

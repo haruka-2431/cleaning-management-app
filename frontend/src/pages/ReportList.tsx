@@ -482,7 +482,7 @@ const ReportList = () => {
         <div className="fixed bottom-0 left-0 right-0 px-4 py-8 z-10 bg-white">
           <button 
             className="btn bg-cyan-800 text-white w-full gap-2 shadow-lg h-14"
-            onClick={() => nav("/adimn/cleaning-edit")}
+            onClick={() => nav("/admin/cleaning-edit")}
           >
             データの編集
             <svg
