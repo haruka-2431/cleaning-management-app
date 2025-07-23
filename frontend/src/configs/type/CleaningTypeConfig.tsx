@@ -1,4 +1,5 @@
-import { EditConfig, ContentEditModalProps, CleaningTypeItem } from "../EditTypeConfig"
+import { EditConfig, ContentEditModalProps, CleaningTypeItem } from "../EditTypeDefinitions"
+import { FormField } from "../../components/FormField";
 
 export const cleaningTypeConfig: EditConfig<CleaningTypeItem, ContentEditModalProps> = {
   title: "清掃タイプ",
@@ -41,16 +42,13 @@ export const cleaningTypeConfig: EditConfig<CleaningTypeItem, ContentEditModalPr
       <div className="mt-12.5 mb-25 w-55">
         <p className="px-1 py-2 text-sm text-gray-700">追加項目</p>
         <div className="p-[2px] border rounded-lg border-gray-500">
-          <input
-            type="text"
-            className="w-full px-3 py-1.5 border rounded-lg border-gray-300 text-sm text-slate-800"
-            placeholder="ここに入力"
-            value={props.inputValue[0] || ""}
-            onChange={(e) => {
-              const newInputValue = [...props.inputValue];
-              newInputValue[0] = e.target.value;
-              props.setInputValue(newInputValue);
-            }}
+          <FormField
+            index={0}
+            placeholder="清掃タイプを入力してください"
+            inputValue={props.inputValue}
+            setInputValue={props.setInputValue}
+            valueBefore={props.valueBefore}
+            isInput={true}
           />
         </div>
       </div>
@@ -59,9 +57,13 @@ export const cleaningTypeConfig: EditConfig<CleaningTypeItem, ContentEditModalPr
       <div className="mt-7.5 mb-15 w-55">
         <div>
           <p className="py-2 text-xs text-gray-700">変更前</p>
-          <p className="w-full px-3 py-1.5 border rounded-lg border-gray-300 text-sm text-slate-800">
-            {props.valueBefore[0]}
-          </p>
+          <FormField
+            index={0}
+            inputValue={props.inputValue}
+            setInputValue={props.setInputValue}
+            valueBefore={props.valueBefore}
+            isInput={false}
+          />
         </div>
         <div className="mt-6 mb-1 flex justify-center text-black">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
@@ -70,16 +72,12 @@ export const cleaningTypeConfig: EditConfig<CleaningTypeItem, ContentEditModalPr
         </div>
         <div>
           <p className="px-1 py-2 text-xs text-gray-700">変更後</p>
-          <input
-            type="text"
-            className="w-full px-3 py-1.5 border rounded-lg border-gray-300 text-sm text-slate-800"
-            placeholder="○○"
-            value={props.inputValue[0] || ""}
-            onChange={(e) => {
-              const newInputValue = [...props.inputValue];
-              newInputValue[0] = e.target.value;
-              props.setInputValue(newInputValue);
-            }}
+          <FormField
+            index={0}
+            inputValue={props.inputValue}
+            setInputValue={props.setInputValue}
+            valueBefore={props.valueBefore}
+            isInput={true}
           />
         </div>
       </div>
@@ -88,9 +86,13 @@ export const cleaningTypeConfig: EditConfig<CleaningTypeItem, ContentEditModalPr
       <div className="mt-12.5 mb-25 w-55">
         <p className="px-1 py-2 text-sm text-gray-700">削除項目</p>
         <div className="p-[2px] border rounded-lg border-gray-500">
-          <p className="w-full px-3 py-1.5 border rounded-lg border-gray-300 text-sm text-slate-800">
-            {props.inputValue}
-          </p>
+          <FormField
+            index={0}
+            inputValue={props.inputValue}
+            setInputValue={props.setInputValue}
+            valueBefore={props.valueBefore}
+            isInput={false}
+          />
         </div>
       </div>
     )

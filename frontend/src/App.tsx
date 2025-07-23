@@ -11,9 +11,9 @@ import { AuthProvider } from "./contexts/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ManagerSelect from "./pages/ManagerSelect";
 import CleanSelect from "./pages/CleanSelect";
-import Checklist from "./pages/Checklist";
+import Checklist from "./pages/CheckList";
 
-import Reportlist from "./pages/Reportlist";
+import Reportlist from "./pages/ReportList";
 import CleaningEdit from "./pages/CleaningEdit";
 import List from "./pages/List";
 import Opening from './pages/Opening';

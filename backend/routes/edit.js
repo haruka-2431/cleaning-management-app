@@ -63,8 +63,9 @@ module.exports = (connection) => {
     });
   });
 
-  router.put("/:type/:id", (req, res) => {
+  router.put("/:type/:action/:id", (req, res) => {
     const type = req.params.type;
+    const key = req.params.action;
     const id = Number(req.params.id);
 
     let params;
@@ -76,7 +77,7 @@ module.exports = (connection) => {
 
     handleQuery({
       type,
-      key: "update",
+      key,
       params,
       res,
       connection,
@@ -98,24 +99,20 @@ module.exports = (connection) => {
   return router;
 };
 
-function paramsBuilder(type, data, id = null) {
-  switch (type) {
-    case "user":
-      if (
-        !data.first_name ||
-        !data.last_name ||
-        !data.email ||
-        !data.position
-      ) {
-        throw new Error("Missing required fields for user");
-      }
-      const userParams = [
-        data.first_name,
-        data.last_name,
-        data.email,
-        data.position,
-      ];
-      return id ? [...userParams, id] : userParams;
+  function paramsBuilder(type, data, id = null){
+    switch(type){
+      case "user":
+        if(data.status){
+          const verified = data.status === "1" ? true : false;
+          return [!verified, id];
+        }
+
+        if (!data.last_name || !data.first_name || !data.email || !data.position){
+          throw new Error("Missing required fields for user");
+        }
+        
+        const userParams = [data.last_name, data.first_name, data.email, data.position];
+        return id ? [...userParams, id] : userParams;
 
     case "cleaning_type":
       if (!data.type_name) {
@@ -123,11 +120,11 @@ function paramsBuilder(type, data, id = null) {
       }
       return id ? [data.type_name, id] : [data.type_name];
 
-    case "cleaning_area":
-      if (!data.type_id || !data.area_name) {
-        throw new Error("Missing required fields for cleaning_area");
-      }
-      return id ? [data.area_name, id] : [data.type_id, data.area_name];
+      case "cleaning_area":
+        if (!data.type_id || !data.area_name){
+          throw new Error("Missing required fields for cleaning_area");
+        }
+        return id ? [data.type_id, data.area_name, id] : [data.type_id, data.area_name];
 
     case "Checklist":
       if (

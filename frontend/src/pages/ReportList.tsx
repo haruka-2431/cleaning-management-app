@@ -256,7 +256,7 @@ const Reportlist = () => {
         </div>
         
         {loading ? (
-          <div className="flex items-center justify-center py-12">
+          <div className="flex items-center justify-center py-32">
             <div className="text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-800 mx-auto mb-4"></div>
               <p className="text-gray-600">レポートを読み込み中...</p>

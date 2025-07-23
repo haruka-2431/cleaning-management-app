@@ -1,4 +1,4 @@
-import { OnModalOpen } from "../configs/EditTypeConfig";
+import { OnModalOpen } from "../configs/EditTypeDefinitions";
 
 type ListHeaderProps = {
   header: (OnModalOpen: OnModalOpen, extraProps?: any) => React.ReactNode;

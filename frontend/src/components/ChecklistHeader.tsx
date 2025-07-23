@@ -1,0 +1,60 @@
+import { LayoutType } from "../configs/EditTypeDefinitions";
+import { AreaSelect } from "../configs/AreaSelect";
+import { SpotSelect } from "../configs/SpotSelect";
+
+type Props = {
+  onModalOpen: (layoutType: LayoutType) => void;
+  selectedSpotID: number | "";
+  setSelectedSpotID: React.Dispatch<React.SetStateAction<number | "">>;
+};
+
+export const ChecklistSelects = ({
+  onModalOpen,
+  selectedSpotID,
+  setSelectedSpotID,
+}: Props) => {
+  const { areaID, setAreaID, areaList } = AreaSelect();
+  const { locationList } = SpotSelect(areaID);
+
+  return (
+    <>
+      <th className="w-2/3 flex flex-col lg:flex-row">
+        <select
+          className="w-50 lg:w-100 border rounded border-gray-300 select-xs"
+          value={areaID}
+          onChange={(e) => setAreaID(e.target.value ? Number(e.target.value) : "")}
+        >
+          <option disabled value="">清掃場所を選択してください</option>
+          {areaList.map((area) => (
+            <option key={area.id} value={area.id}>
+              {area.area_name}
+            </option>
+          ))}
+        </select>
+        <select
+          className="w-50 lg:w-100 border rounded border-gray-300 select-xs"
+          disabled={!areaID}
+          value={selectedSpotID}
+          onChange={(e) => setSelectedSpotID(e.target.value ? Number(e.target.value) : "")}
+        >
+          <option disabled value="">
+            {areaID ? "清掃箇所を選択してください" : "先に清掃場所を選択してください"}
+          </option>
+          {locationList.map((location) => (
+            <option key={location.id} value={location.id}>
+              {location.location}
+            </option>
+          ))}
+        </select>
+      </th>
+      <th className="w-1/3">
+        <button
+          className="px-2 py-1 bg-gray-300 text-black text-xs rounded"
+          onClick={() => onModalOpen("add")}
+        >
+          項目追加+
+        </button>
+      </th>
+    </>
+  );
+};
