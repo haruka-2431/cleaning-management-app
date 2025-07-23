@@ -1,6 +1,6 @@
 import { EditConfig, ContentEditModalProps, CleaningAreaItem } from "../EditTypeDefinitions"
-import { FormField } from "../../components/FormField";
-import { CleaningAreaModalContent } from "../../components/CleaningAreaModalContent";
+import { FormField } from "../../components/modal/FormField";
+import { CleaningAreaModalContent } from "../../components/modal/CleaningAreaModalContent";
 
 export const cleaningAreaConfig: EditConfig<CleaningAreaItem, ContentEditModalProps> = {
   title: "清掃場所",

@@ -1,8 +1,8 @@
 import { EditConfig, ContentEditModalProps, ChecklistItem } from "../EditTypeDefinitions"
 import { ChecklistHeaderProps } from "../EditTypeConfig";
 import { ChecklistSelects } from "../../components/ChecklistHeader";
-import { ChecklistModalContent } from "../../components/ChecklistModalContent";
-import { FormField } from "../../components/FormField";
+import { ChecklistModalContent } from "../../components/modal/ChecklistModalContent";
+import { FormField } from "../../components/modal/FormField";
 
 export const ChecklistConfig: EditConfig<
   ChecklistItem,

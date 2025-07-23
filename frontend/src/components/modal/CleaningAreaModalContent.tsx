@@ -1,6 +1,6 @@
 import { useEffect } from "react";
-import { ContentEditModalProps } from "../configs/EditTypeDefinitions";
-import { TypeSelect } from "../configs/TypeSelect";
+import { ContentEditModalProps } from "../../configs/EditTypeDefinitions";
+import { TypeSelect } from "../../configs/TypeSelect";
 import { FormField } from "./FormField";
 
 interface CleaningTypeModalProps extends ContentEditModalProps {

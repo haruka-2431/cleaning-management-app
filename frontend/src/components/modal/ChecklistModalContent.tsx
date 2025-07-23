@@ -1,7 +1,7 @@
 import { useEffect } from "react";
-import { ContentEditModalProps } from "../configs/EditTypeDefinitions";
-import { AreaSelect } from "../configs/AreaSelect";
-import { SpotSelect } from "../configs/SpotSelect";
+import { ContentEditModalProps } from "../../configs/EditTypeDefinitions";
+import { AreaSelect } from "../../configs/AreaSelect";
+import { SpotSelect } from "../../configs/SpotSelect";
 
 interface ChecklistModalProps extends ContentEditModalProps {
   mode: "add" | "update";
