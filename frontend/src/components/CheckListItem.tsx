@@ -27,7 +27,7 @@ interface ChecklistItem {
   item: string;
 }
 
-// ← DBからエリアID取得（修正版）
+// DBからエリアID取得
 export const getAreaIdByName = async (typeName: string, areaName: string): Promise<number | null> => {
   try {
     console.log("エリアID取得開始:", typeName, areaName);
