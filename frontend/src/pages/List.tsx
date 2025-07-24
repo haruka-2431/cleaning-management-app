@@ -4,18 +4,12 @@ import { useParams } from "react-router-dom";
 import Header from "../components/Header";
 import ListHeader from "../components/ListHeader";
 import ListBody from "../components/ListBody";
-import EditModal from "../components/EditModal";
+import EditModal from "../components/modal/EditModal";
 
-import { editConfig } from "../configs/EditConfig";
-import {
-  ItemMap,
-  EditConfig,
-  EditConfigKey,
-  OnModalOpen,
-  EditModalHandle,
-} from "../configs/EditTypeConfig";
+import { editConfig } from "../configs/EditTypeConfig";
+import { ItemMap, EditConfig ,EditConfigKey, OnModalOpen, EditModalHandle } from "../configs/EditTypeDefinitions";
 
-export const API_URL = "http://localhost:3000/cleaning-edit";
+export const API_EDIT = "http://localhost:3000/cleaning-edit";
 
 type ListProps = {
   title: string;
@@ -32,7 +26,7 @@ const List = ({ title, setTitle }: ListProps) => {
   const currentList = editConfig[type] as EditConfig<ItemMap[typeof type]>;
   const [data, setData] = useState<ItemMap[typeof type][]>([]);
 
-  //Checklistの差分表示機構
+  //checklistの差分表示機構
   const [selectedSpotID, setSelectedSpotID] = useState<number | "">("");
 
   useEffect(() => {
@@ -48,12 +42,12 @@ const List = ({ title, setTitle }: ListProps) => {
     }
   }, [type, selectedSpotID]);
 
-  const fetchData = async () => {
-    try {
-      let url = `${API_URL}/${type}`;
+  const fetchData =  async() => {
+    try{
+      let url = `${API_EDIT}/${type}`;
 
-      //清掃箇所が指定された場合のみ（Checklist）
-      if (type === "Checklist" && selectedSpotID !== "") {
+      //清掃箇所が指定された場合のみ（checklist）
+      if (type === "checklist" && selectedSpotID !== "") {
         url += `/select_spot/${selectedSpotID}`;
       }
 
@@ -66,8 +60,8 @@ const List = ({ title, setTitle }: ListProps) => {
       const json = await res.json();
       setData(json);
 
-      //初期状態では表示されないよう変更（Checklist）
-      if (type === "Checklist" && selectedSpotID === "") setData([]);
+      //初期状態では表示されないよう変更（checklist）
+      if (type === "checklist" && selectedSpotID === "") setData([]);
     } catch (err) {
       console.log(err);
       setData([]);
@@ -88,42 +82,53 @@ const List = ({ title, setTitle }: ListProps) => {
   };
 
   //Data変換
-  const getItemFormat = (type: string, value: string[]) => {
-    switch (type) {
+  const getItemFormat = (
+    type: string,
+    value: string[],
+    action: string
+  ) => {
+    switch(type){
       case "user":
-        return { name: value[0], email: value[1], position: value[2] };
+        if(action === "authentication"){
+          return { status: value[0] };
+        }
+        return { last_name: value[0], first_name: value[1], email: value[2], position: value[3] };
+
       case "cleaning_type":
         return { type_name: value[0] };
+
       case "cleaning_area":
-        return { type_name: value[0], area_name: value[1] };
-      case "Checklist":
-        return { area_name: value[0], location: value[1], item: value[2] };
+        return { type_id: Number(value[0]), area_name: value[1] };
+
+      case "checklist":
+        return { spot_id: Number(value[1]), item: value[2] };
+        
       default:
         return {};
     }
   };
 
   //CRUD
-  const addItem = async (input: string[]) => {
-    await fetch(`${API_URL}/${type}`, {
+  const addItem = async(input: string[]) => {
+    await fetch(`${API_EDIT}/${type}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(getItemFormat(type, input)),
+      body: JSON.stringify(getItemFormat(type, input, "")),
     });
     await fetchData();
   };
 
-  const editItem = async (input: string[], id: number | null) => {
-    await fetch(`${API_URL}/${type}/${id}`, {
+  const editItem = async (input: string[], id: number | null, action: string) => {
+    await fetch(`${API_EDIT}/${type}/${action}/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(getItemFormat(type, input)),
+      body: JSON.stringify(getItemFormat(type, input, action)),
     });
     await fetchData();
   };
 
   const deleteItem = async (id: number | null) => {
-    await fetch(`${API_URL}/${type}/${id}`, {
+    await fetch(`${API_EDIT}/${type}/${id}`, {
       method: "DELETE",
     });
     await fetchData();

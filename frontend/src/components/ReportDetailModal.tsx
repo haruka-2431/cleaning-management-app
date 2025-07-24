@@ -3,7 +3,7 @@ import {
   CheckIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
-import { Report } from "../pages/Reportlist";
+import { Report } from "../pages/ReportList";
 
 interface ReportDetailModalProps {
   selectedReport: Report | null;

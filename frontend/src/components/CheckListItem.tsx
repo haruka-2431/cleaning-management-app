@@ -27,7 +27,7 @@ interface ChecklistItem {
   item: string;
 }
 
-// ← DBからエリアID取得（修正版）
+// DBからエリアID取得
 export const getAreaIdByName = async (typeName: string, areaName: string): Promise<number | null> => {
   try {
     console.log("エリアID取得開始:", typeName, areaName);
@@ -56,27 +56,27 @@ export const getAreaIdByName = async (typeName: string, areaName: string): Promi
   }
 };
 
-// ← DBからチェックリスト取得（修正版）
+// DBからチェックリスト取得
 export const fetchChecklistTemplate = async (areaId: number): Promise<ChecklistTemplate> => {
   try {
     console.log("チェックリスト取得開始 areaId:", areaId);
     
-    // Step 1: cleaning_spot 取得
+    // cleaning_spot 取得
     const spotResponse = await fetch(`${MY_API_URL}/cleaning_spot`);
     const spotData: CleaningSpot[] = await spotResponse.json();
     console.log("cleaning_spot データ:", spotData);
     
-    // Step 2: checklist 取得
+    // checklist 取得
     const checklistResponse = await fetch(`${MY_API_URL}/checklist`);
     const checklistData: ChecklistItem[] = await checklistResponse.json();
     console.log("checklist データ:", checklistData);
     
-    // Step 3: エリア名取得
+    // エリア名取得
     const areaResponse = await fetch(`${MY_API_URL}/cleaning_area`);
     const areaData: CleaningArea[] = await areaResponse.json();
     const area = areaData.find((a: CleaningArea) => a.id === areaId);
     
-    // Step 4: データ構築
+    // データ構築
     const template: ChecklistTemplate = {
       title: area ? area.area_name : "チェックリスト",
       data: {}
@@ -106,7 +106,7 @@ export const fetchChecklistTemplate = async (areaId: number): Promise<ChecklistT
   }
 };
 
-// ← 静的データをフォールバック用に保持
+// 静的データをフォールバック用に保持
 export const ChecklistTemplates: { [key: string]: ChecklistTemplate } = {
   tenjin: {
     title: "民泊清掃 - 天神 -",
@@ -387,7 +387,7 @@ export const ChecklistTemplates: { [key: string]: ChecklistTemplate } = {
   },
 };
 
-// ← 新しい動的取得関数（修正版）
+// 新しい動的取得関数
 export const getTemplateByTypeAndLocation = async (type: string, location: string): Promise<ChecklistTemplate> => {
   try {
     console.log("テンプレート取得開始:", type, location);

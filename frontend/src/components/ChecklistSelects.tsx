@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { CleaningAreaItem, LayoutType } from "../configs/EditTypeConfig";
-import { API_URL } from "../pages/List";
+import { CleaningAreaItem, LayoutType } from "../configs/EditTypeDefinitions";
+import { API_EDIT } from "../pages/List";
 
 type CleaningLocation = { id: number; location: string };
 
@@ -22,7 +22,7 @@ export const ChecklistSelects = ({
 
   //cleaning_area一覧取得
   useEffect(() => {
-    fetch(API_URL + "/cleaning_area")
+    fetch(API_EDIT + "/cleaning_area")
       .then((res) => res.json())
       .then((data) => setAreaList(data))
       .catch(() => setAreaList([]));
@@ -35,7 +35,7 @@ export const ChecklistSelects = ({
       return;
     }
 
-    fetch(API_URL + `/cleaning_spot/select_spot/${selectedAreaID}`)
+    fetch(API_EDIT + `/cleaning_spot/select_spot/${selectedAreaID}`)
       .then((res) => res.json())
       .then((data) => setLocationList(data))
       .catch(() => setLocationList([]));

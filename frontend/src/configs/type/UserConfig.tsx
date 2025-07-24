@@ -1,4 +1,5 @@
-import { EditConfig, ContentEditModalProps, UserItem } from "../EditTypeConfig"
+import { EditConfig, ContentEditModalProps, UserItem } from "../EditTypeDefinitions"
+import { FormField } from "../../components/modal/FormField";
 
 export const userConfig: EditConfig<UserItem, ContentEditModalProps> = {
   title: "個人データ",
@@ -15,7 +16,7 @@ export const userConfig: EditConfig<UserItem, ContentEditModalProps> = {
     const [userName, domain] = item.email.split("@");
     return (
       <>
-        <td>{item.name}</td>
+        <td>{item.last_name + item.first_name}</td>
         <td>{userName}<br className="lg:hidden" />@{domain}</td>
         <td className="hidden lg:table-cell">{item.position}</td>
         <td>
@@ -24,20 +25,20 @@ export const userConfig: EditConfig<UserItem, ContentEditModalProps> = {
               <>
                 <button
                   className="px-2 py-1 bg-teal-600 text-white rounded"
-                  onClick={() => onModalOpen("update", item.id, item.name, item.email, item.position)}
+                  onClick={() => onModalOpen("update", item.id, item.last_name, item.first_name, item.email, item.position)}
                 >
                   変更
                 </button>
                 <button
                   className="px-2 py-1 bg-red-600 text-white rounded"
-                  onClick={() => onModalOpen("delete", item.id, item.name, item.email, item.position)}
+                  onClick={() => onModalOpen("delete", item.id, item.last_name, item.first_name, item.email, item.position)}
                 >
                   削除
                 </button>
               </> : 
               <button
                 className="w-30 h-7.5 flex justify-center items-center border rounded border-cyan-600"
-                onClick={() => onModalOpen("authentication", item.id, item.name, item.email, item.position)}
+                onClick={() => onModalOpen("authentication", item.id, item.last_name, item.first_name, item.email, item.position, item.status)}
               >
                 未認証
               </button>
@@ -52,32 +53,33 @@ export const userConfig: EditConfig<UserItem, ContentEditModalProps> = {
       <div className="mt-7.5 mb-15 w-55">
         <p className="text-sm text-gray-700">このユーザーを承認しますか？</p>
         <div className="p-[2px] border rounded-lg border-gray-500">
-          <p className="w-full px-3 py-1.5 border rounded-lg border-gray-300 text-sm text-slate-800">
-            {props.inputValue[0]}
-          </p>
-          <p className="w-full px-3 py-1.5 border rounded-lg border-gray-300 text-sm text-slate-800">
-            {props.inputValue[1]}
-          </p>
-          <p className="w-full px-3 py-1.5 border rounded-lg border-gray-300 text-sm text-slate-800">
-            {props.inputValue[2]}
-          </p>
+          {props.inputValue.slice(0, -1).map((_, index) => 
+            <FormField
+              key={index}
+              index={index}
+              inputValue={props.inputValue}
+              setInputValue={props.setInputValue}
+              valueBefore={props.valueBefore}
+              isInput={true}
+            />
+          )}
         </div>
-        <input type="text" />
       </div>
     ),
     update: (props: ContentEditModalProps) => (
       <div className="mt-7.5 mb-15 w-55">
         <div>
           <p className="py-2 text-xs text-gray-700">変更前</p>
-          <p className="w-full px-3 py-1.5 border rounded-lg border-gray-300 text-sm text-slate-800">
-            {props.valueBefore[0]}
-          </p>
-          <p className="w-full px-3 py-1.5 border rounded-lg border-gray-300 text-sm text-slate-800">
-            {props.valueBefore[1]}
-          </p>
-          <p className="w-full px-3 py-1.5 border rounded-lg border-gray-300 text-sm text-slate-800">
-            {props.valueBefore[2]}
-          </p>
+          {props.valueBefore.map((_, index) => 
+            <FormField
+              key={index}
+              index={index}
+              inputValue={props.inputValue}
+              setInputValue={props.setInputValue}
+              valueBefore={props.valueBefore}
+              isInput={false}
+            />
+          )}
         </div>
         <div className="mt-6 mb-1 flex justify-center text-black">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
@@ -86,39 +88,16 @@ export const userConfig: EditConfig<UserItem, ContentEditModalProps> = {
         </div>
         <div>
           <p className="px-1 py-2 text-xs text-gray-700">変更後</p>
-          <input
-            type="text"
-            className="w-full px-3 py-1.5 border rounded-lg border-gray-300 text-sm text-slate-800"
-            placeholder="○○"
-            value={props.inputValue[0] || ""}
-            onChange={(e) => {
-              const newInputValue = [...props.inputValue];
-              newInputValue[0] = e.target.value;
-              props.setInputValue(newInputValue);
-            }}
-          />
-          <input
-            type="text"
-            className="w-full px-3 py-1.5 border rounded-lg border-gray-300 text-sm text-slate-800"
-            placeholder="○○"
-            value={props.inputValue[1] || ""}
-            onChange={(e) => {
-              const newInputValue = [...props.inputValue];
-              newInputValue[1] = e.target.value;
-              props.setInputValue(newInputValue);
-            }}
-          />
-          <input
-            type="text"
-            className="w-full px-3 py-1.5 border rounded-lg border-gray-300 text-sm text-slate-800"
-            placeholder="○○"
-            value={props.inputValue[2] || ""}
-            onChange={(e) => {
-              const newInputValue = [...props.inputValue];
-              newInputValue[2] = e.target.value;
-              props.setInputValue(newInputValue);
-            }}
-          />
+          {props.inputValue.map((_, index) => 
+            <FormField
+              key={index}
+              index={index}
+              inputValue={props.inputValue}
+              setInputValue={props.setInputValue}
+              valueBefore={props.valueBefore}
+              isInput={true}
+            />
+          )}
         </div>
       </div>
     ),
@@ -126,15 +105,16 @@ export const userConfig: EditConfig<UserItem, ContentEditModalProps> = {
       <div className="mt-12.5 mb-25 w-55">
         <p className="px-1 py-2 text-sm text-gray-700">削除項目</p>
         <div className="p-[2px] border rounded-lg border-gray-500">
-          <p className="w-full px-3 py-1.5 border rounded-lg border-gray-300 text-sm text-slate-800">
-            {props.inputValue[0]}
-          </p>
-          <p className="w-full px-3 py-1.5 border rounded-lg border-gray-300 text-sm text-slate-800">
-            {props.inputValue[1]}
-          </p>
-          <p className="w-full px-3 py-1.5 border rounded-lg border-gray-300 text-sm text-slate-800">
-            {props.inputValue[2]}
-          </p>
+          {props.inputValue.map((_, index) => 
+            <FormField
+              key={index}
+              index={index}
+              inputValue={props.inputValue}
+              setInputValue={props.setInputValue}
+              valueBefore={props.valueBefore}
+              isInput={false}
+            />
+          )}
         </div>
       </div>
     )

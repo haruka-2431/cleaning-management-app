@@ -1,4 +1,4 @@
-import { OnModalOpen } from "../configs/EditTypeConfig";
+import { OnModalOpen } from "../configs/EditTypeDefinitions";
 
 type ListBodyProps<T> = {
   data: T[];
