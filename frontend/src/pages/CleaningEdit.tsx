@@ -37,7 +37,7 @@ const CleaningEdit = ({ title, setTitle }: CleaningEditProps) => {
           </button>
           <button
             className="py-4.5 lg:py-7 bg-teal-600 rounded-lg text-center text-white"
-            onClick={() => handleClick("Checklist")}
+            onClick={() => handleClick("checklist")}
           >
             チェックリスト
           </button>
