@@ -26,7 +26,7 @@ const List = ({ title, setTitle }: ListProps) => {
   const currentList = editConfig[type] as EditConfig<ItemMap[typeof type]>;
   const [data, setData] = useState<ItemMap[typeof type][]>([]);
 
-  //Checklistの差分表示機構
+  //checklistの差分表示機構
   const [selectedSpotID, setSelectedSpotID] = useState<number | "">("");
 
   useEffect(() => {
@@ -46,7 +46,7 @@ const List = ({ title, setTitle }: ListProps) => {
     try{
       let url = `${API_EDIT}/${type}`;
 
-      //清掃箇所が指定された場合のみ（Checklist）
+      //清掃箇所が指定された場合のみ（checklist）
       if (type === "checklist" && selectedSpotID !== "") {
         url += `/select_spot/${selectedSpotID}`;
       }
@@ -60,7 +60,7 @@ const List = ({ title, setTitle }: ListProps) => {
       const json = await res.json();
       setData(json);
 
-      //初期状態では表示されないよう変更（Checklist）
+      //初期状態では表示されないよう変更（checklist）
       if (type === "checklist" && selectedSpotID === "") setData([]);
     } catch (err) {
       console.log(err);

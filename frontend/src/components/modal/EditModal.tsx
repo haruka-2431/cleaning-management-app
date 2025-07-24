@@ -1,6 +1,7 @@
 import { forwardRef, useImperativeHandle, useRef, useState } from "react";
 import { EditModalHandle, EditModalProps, LayoutType, RendererEditModalProps } from "../../configs/EditTypeDefinitions";
 import { editConfig } from "../../configs/EditTypeConfig";
+import DeleteModal from "./DeleteModal";
 
 const EditModal = forwardRef<EditModalHandle, EditModalProps>((props, ref) => {
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -9,6 +10,9 @@ const EditModal = forwardRef<EditModalHandle, EditModalProps>((props, ref) => {
   const [valueBefore, setValueBefore] = useState<string[]>([]);
   const [selectID, setSelectID] = useState<number | null>(null);
   const [layoutType, setLayoutType] = useState<LayoutType>("");
+
+  //削除確認Modalの表示を制御
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   //showModal・closeを外部から使えるようにする
   useImperativeHandle(ref, ()=> ({
@@ -82,13 +86,28 @@ const EditModal = forwardRef<EditModalHandle, EditModalProps>((props, ref) => {
               onClick={() => {
                 if(layoutType === "add") props.addItem(inputValue);
                 if(layoutType === "update" || layoutType === "authentication") props.editItem(inputValue, selectID, layoutType);
-                if(layoutType === "delete") props.deleteItem(selectID);
+                if(layoutType === "delete"){
+                  setShowDeleteModal(true);
+                  return;
+                }
                 props.onModalClose();
               }}
             >{btnLabel}</button>
           </form>
         </div>
       </div>
+
+    {showDeleteModal && (
+      <DeleteModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={() => {
+          props.deleteItem(selectID);
+          setShowDeleteModal(false);
+          props.onModalClose();
+        }}
+      />
+    )}
     </dialog>
   );
 });

@@ -6,7 +6,7 @@ const ALLOWED_TYPE = [
   "cleaning_type",
   "cleaning_area",
   "cleaning_spot",
-  "Checklist",
+  "checklist",
   "cleaning_report",
 ];
 
@@ -126,13 +126,13 @@ module.exports = (connection) => {
         }
         return id ? [data.type_id, data.area_name, id] : [data.type_id, data.area_name];
 
-    case "Checklist":
+    case "checklist":
       if (
         typeof data.spot_id !== "number" ||
         typeof data.item !== "string" ||
         !data.item.trim()
       ) {
-        throw new Error("Missing or invalid fields for Checklist");
+        throw new Error("Missing or invalid fields for checklist");
       }
       return id ? [data.spot_id, data.item, id] : [data.spot_id, data.item];
 
