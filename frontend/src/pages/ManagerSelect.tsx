@@ -24,10 +24,20 @@ const ManagerSelect = ({
   const { setUserRole } = useAuth();
 
   const handleClick = (role: UserRole) => {
-    //AuthContextでロール設定
-    setUserRole(role);
-    nav(`/${role}`);
-  }
+  // AuthContextでロール設定
+  setUserRole(role);
+  
+  // LocalStorageに保存
+  const userSelection = {
+    userType: role,
+    timestamp: Date.now(),
+    selectedAt: new Date().toISOString()
+  };
+  localStorage.setItem('cleaning-manager-user', JSON.stringify(userSelection));
+  
+  // 画面遷移
+  nav(`/${role}`);
+}
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
@@ -57,7 +67,6 @@ const ManagerSelect = ({
           </div>
         )}
 
-
         {/* 作業者ボタン */}
         <button
           onClick={() => handleClick('worker')}
@@ -75,7 +84,6 @@ const ManagerSelect = ({
           <Cog6ToothIcon className="w-6 h-6" />
           <span className="text-lg">管理者として使用</span>
         </button>
-
 
         {/* フッター情報 */}
         <div className="text-center mt-8 text-gray-500 text-sm">

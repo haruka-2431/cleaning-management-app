@@ -1,10 +1,12 @@
 import "./css/style.css";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   BrowserRouter as Router,
   Routes,
   Route,
   Navigate,
+  useNavigate, 
+  useLocation
 } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 
@@ -12,26 +14,45 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import ManagerSelect from "./pages/ManagerSelect";
 import CleanSelect from "./pages/CleanSelect";
 import Checklist from "./pages/CheckList";
-
 import Reportlist from "./pages/ReportList";
 import CleaningEdit from "./pages/CleaningEdit";
 import List from "./pages/List";
 import Opening from './pages/Opening';
 
+// Router内でLocalStorage処理を行うコンポーネント
+const RouterEffect = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    const savedUser = localStorage.getItem('cleaning-manager-user');
+    
+    if (savedUser && location.pathname === '/manager-select') {
+      const userSelection = JSON.parse(savedUser);
+      const targetPath = userSelection.userType === 'admin' ? '/admin' : '/worker';
+      navigate(targetPath, { replace: true });
+    }
+  }, [location, navigate]);
+
+  return null; 
+};
+
 const App = () => {
   const [title, setTitle] = useState<string>("");
-   const [showOpening, setShowOpening] = useState<boolean>(true);
+  const [showOpening, setShowOpening] = useState<boolean>(true);
 
   const handleOpeningComplete = () => {
     setShowOpening(false);
   };
 
+  if (showOpening) {
+    return <Opening onComplete={handleOpeningComplete} />;
+  }
+
   return (
     <AuthProvider>
-      {showOpening ? (
-        <Opening onComplete={handleOpeningComplete} />
-      ) : (
       <Router>
+        <RouterEffect />
         <Routes>
           <Route path="/" element={<Navigate to="/manager-select" />} />
           <Route path="/manager-select" element={<ManagerSelect />} />
@@ -78,7 +99,6 @@ const App = () => {
           <Route path="*" element={<Navigate to="/manager-select" replace />} />
         </Routes>
       </Router>
-      )}
     </AuthProvider>
   );
 };
