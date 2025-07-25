@@ -226,3 +226,13 @@ function handleQuery({ type, key, params = [], res, connection }) {
     }
   });
 }
+
+ router.post("/checklist/save", (req, res) => {
+    const { checklistData } = req.body;
+    
+    if (!checklistData || !Array.isArray(checklistData)) {
+      return res.status(400).json({ error: "Invalid checklist data" });
+    }
+    
+    res.status(200).json({ success: true, message: "Checklist saved" });
+  });

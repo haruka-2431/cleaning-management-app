@@ -7,7 +7,7 @@ import {
 } from "@heroicons/react/24/outline";
 import PhotoModal from "./PhotoModal";
 
-export const MY_API_URL = "http://localhost:3000/another";
+export const MY_API_URL = "/api/another";
 
 // 型定義
 interface User {

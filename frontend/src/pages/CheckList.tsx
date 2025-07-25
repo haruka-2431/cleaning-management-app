@@ -7,7 +7,7 @@ import ChecklistSection from "../components/CheckListSection";
 import ReportModal from "../components/ReportModal";
 import CompletedScreen from "../components/CompletedScreen";
 
-export const MY_API_URL = "http://localhost:3000/another";
+export const MY_API_URL = "/api/another";
 
 interface CheckedItems {
   [key: string]: boolean;
@@ -26,14 +26,17 @@ const Checklist = () => {
   const cleaningData = location.state;
 
   const [selectedTemplate, setSelectedTemplate] = useState<string>("");
-  const [currentChecklist, setCurrentChecklist] = useState<ChecklistTemplate | undefined>(undefined);
+  const [currentChecklist, setCurrentChecklist] = useState<
+    ChecklistTemplate | undefined
+  >(undefined);
   const [checkedItems, setCheckedItems] = useState<CheckedItems>({});
   const [reportModalOpen, setReportModalOpen] = useState<boolean>(false);
   const [uploadedPhotos, setUploadedPhotos] = useState<File[]>([]);
   const [completed, setCompleted] = useState<boolean>(false);
-  const [selectedPersonInCharge, setSelectedPersonInCharge] = useState<string>("追加者なし");
+  const [selectedPersonInCharge, setSelectedPersonInCharge] =
+    useState<string>("追加者なし");
   const [loading, setLoading] = useState<boolean>(false);
-  
+
   // 作業時間記録用の状態
   const [workStartTime, setWorkStartTime] = useState<Date | null>(null);
 
@@ -46,7 +49,7 @@ const Checklist = () => {
       return type ? type.id : 1;
     } catch (err) {
       console.error("type_id取得エラー:", err);
-      return 1; 
+      return 1;
     }
   };
 
@@ -60,10 +63,10 @@ const Checklist = () => {
         } else if (currentType === "ハウスクリーニング") {
           return 2; // ハウスクリーニング用のarea_id
         } else {
-          return 1; 
+          return 1;
         }
       }
-      
+
       const response = await fetch(`${MY_API_URL}/cleaning_area`);
       const data = await response.json();
       const area = data.find((item: any) => item.area_name === areaName);
@@ -73,7 +76,7 @@ const Checklist = () => {
       return 1; // デフォルト値
     }
   };
-  
+
   useEffect(() => {
     const loadTemplate = async () => {
       if (cleaningData && cleaningData.type && cleaningData.location) {
@@ -83,22 +86,21 @@ const Checklist = () => {
             cleaningData.type,
             cleaningData.location
           );
-          
+
           // DBから取得したテンプレートを直接セット
-          setSelectedTemplate('db-template');
+          setSelectedTemplate("db-template");
           setCurrentChecklist(template);
-          
         } catch (err) {
           console.error("テンプレート取得エラー:", err);
           // エラー時：巡回清掃として処理
-          setSelectedTemplate('junkai');
+          setSelectedTemplate("junkai");
           setCurrentChecklist({ title: "エラー", data: {} });
         } finally {
           setLoading(false);
         }
       }
     };
-    
+
     loadTemplate();
   }, [cleaningData]);
 
@@ -110,81 +112,93 @@ const Checklist = () => {
   }, [workStartTime]);
 
   // 写真保存関数
-  const savePhotoToDbWithReportId = async (photoUrl: string, reportId: number) => {
+  const savePhotoToDbWithReportId = async (
+    photoUrl: string,
+    reportId: number
+  ) => {
     try {
       const requestData = {
         report_id: reportId,
         photo_url: photoUrl,
-        posted_datetime: new Date().toISOString().slice(0, 19).replace('T', ' '),
+        posted_datetime: new Date()
+          .toISOString()
+          .slice(0, 19)
+          .replace("T", " "),
       };
-      
+
       const response = await fetch(`${MY_API_URL}/photo`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(requestData),
       });
-      
+
       if (!response.ok) {
         const errorText = await response.text();
         console.error("写真API エラー:", errorText);
         throw new Error(`写真API エラー: ${response.status} - ${errorText}`);
       }
-      
     } catch (err) {
       console.error("写真保存エラー:", err);
       throw err;
     }
   };
 
-  const saveLocationTimeToDbWithReportId = async (taskName: string, requiredTime: string, reportId: number) => {
+  const saveLocationTimeToDbWithReportId = async (
+    taskName: string,
+    requiredTime: string,
+    reportId: number
+  ) => {
     try {
       const requestData = {
         report_id: reportId,
         task_name: taskName,
         required_time: requiredTime,
       };
-      
+
       const response = await fetch(`${MY_API_URL}/location_time`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(requestData),
       });
-      
+
       if (!response.ok) {
         const errorText = await response.text();
         console.error("作業時間API エラー:", errorText);
-        throw new Error(`作業時間API エラー: ${response.status} - ${errorText}`);
+        throw new Error(
+          `作業時間API エラー: ${response.status} - ${errorText}`
+        );
       }
-      
     } catch (err) {
       console.error("作業時間保存エラー:", err);
       throw err;
     }
   };
 
-  const saveChecklistToDbWithReportId = async (checkedItems: CheckedItems, reportId: number) => {
+  const saveChecklistToDbWithReportId = async (
+    checkedItems: CheckedItems,
+    reportId: number
+  ) => {
     try {
       const checkedList = Object.entries(checkedItems)
         .filter(([_, checked]) => checked)
         .map(([key]) => key);
-      
+
       const requestData = {
         report_id: reportId,
         checked_items: checkedList,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
-      
+
       const response = await fetch(`${MY_API_URL}/checklist/save`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(requestData),
       });
-      
+
       if (!response.ok) {
         const errorText = await response.text();
         console.error("チェックリストAPI エラー:", errorText);
       }
-      
     } catch (err) {
       console.error("チェックリスト保存エラー:", err);
     }
@@ -197,66 +211,76 @@ const Checklist = () => {
       if (uploadedPhotos.length === 0) {
         throw new Error("写真を1枚以上選択してください");
       }
-      
+
       // cleaning_reportレコードを作成
       const workEndTime = new Date();
-      
+
       // 動的にIDを取得
       const typeId = await getTypeIdByName(cleaningData?.type || "民泊清掃");
-      const areaId = await getAreaIdByName(cleaningData?.location || "選択なし");
-      
+      const areaId = await getAreaIdByName(
+        cleaningData?.location || "選択なし"
+      );
+
       const reportData = {
-        user_id: 1,  // 実際のユーザーIDに変更（ログイン機能実装後）
-        sub_user_id: selectedPersonInCharge !== "追加者なし" ? 2 : null,  // 実際のサブユーザーIDに変更
+        user_id: 1, // 実際のユーザーIDに変更（ログイン機能実装後）
+        sub_user_id: selectedPersonInCharge !== "追加者なし" ? 2 : null, // 実際のサブユーザーIDに変更
         type_id: typeId,
         area_id: areaId,
-        start_datetime: workStartTime?.toISOString().slice(0, 19).replace('T', ' ') || new Date().toISOString().slice(0, 19).replace('T', ' '),
-        end_datetime: workEndTime.toISOString().slice(0, 19).replace('T', ' '),
-        status: false  // 未確認として作成
+        start_datetime:
+          workStartTime?.toISOString().slice(0, 19).replace("T", " ") ||
+          new Date().toISOString().slice(0, 19).replace("T", " "),
+        end_datetime: workEndTime.toISOString().slice(0, 19).replace("T", " "),
+        status: false, // 未確認として作成
       };
-      
+
       const reportResponse = await fetch(`${MY_API_URL}/cleaning_report`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(reportData),
       });
-      
+
       if (!reportResponse.ok) {
         const errorText = await reportResponse.text();
         console.error("cleaning_reportエラー:", errorText);
-        throw new Error(`cleaning_report作成エラー: ${reportResponse.status} - ${errorText}`);
+        throw new Error(
+          `cleaning_report作成エラー: ${reportResponse.status} - ${errorText}`
+        );
       }
-      
+
       const reportResult = await reportResponse.json();
       const actualReportId = reportResult.insertedId;
-      
+
       // 実際のreport_idを使ってチェックリスト保存
       await saveChecklistToDbWithReportId(checkedItems, actualReportId);
-      
+
       // 実際のreport_idを使って写真保存
       if (uploadedPhotos.length > 0) {
         const dummyPhotoUrl = "https://example.com/photo.jpg";
         await savePhotoToDbWithReportId(dummyPhotoUrl, actualReportId);
       }
-      
+
       // 実際のreport_idを使って作業時間保存
       if (workStartTime) {
         const workDurationMs = workEndTime.getTime() - workStartTime.getTime();
         const workDurationMinutes = Math.floor(workDurationMs / 60000);
         const hours = Math.floor(workDurationMinutes / 60);
         const minutes = workDurationMinutes % 60;
-        
-        const requiredTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:00`;
-        
-        await saveLocationTimeToDbWithReportId(cleaningData?.location || "清掃作業", requiredTime, actualReportId);
+
+        const requiredTime = `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:00`;
+
+        await saveLocationTimeToDbWithReportId(
+          cleaningData?.location || "清掃作業",
+          requiredTime,
+          actualReportId
+        );
       }
-      
+
       setReportModalOpen(false);
       setCompleted(true);
-      
     } catch (err) {
       console.error("報告書提出エラー:", err);
-      const errorMessage = err instanceof Error ? err.message : `不明なエラー: ${err}`;
+      const errorMessage =
+        err instanceof Error ? err.message : `不明なエラー: ${err}`;
       alert(`エラー: ${errorMessage}`);
     }
   };
@@ -312,7 +336,9 @@ const Checklist = () => {
       </div>
 
       <div className="relative flex-1 overflow-y-auto mb-28">
-        {selectedTemplate === "junkai" || !currentChecklist || Object.keys(currentChecklist.data).length === 0 ? (
+        {selectedTemplate === "junkai" ||
+        !currentChecklist ||
+        Object.keys(currentChecklist.data).length === 0 ? (
           <div className="w-full absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center">
             <p className="text-gray-500 text-lg text-center">
               チェックリストはありません

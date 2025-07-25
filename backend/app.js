@@ -1,10 +1,9 @@
-const express = require('express');
+const express = require("express");
 const cors = require("cors");
 const mysql = require("mysql2");
 
 const app = express();
 const port = 3000;
-
 
 app.use(cors());
 app.use(express.json());
@@ -18,7 +17,7 @@ const connection = mysql.createConnection({
 });
 
 connection.connect((err) => {
-  if(err){
+  if (err) {
     console.error("MySQL connection error:", err);
     process.exit(1);
   }

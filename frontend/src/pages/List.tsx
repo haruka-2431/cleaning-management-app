@@ -7,9 +7,15 @@ import ListBody from "../components/ListBody";
 import EditModal from "../components/modal/EditModal";
 
 import { editConfig } from "../configs/EditTypeConfig";
-import { ItemMap, EditConfig ,EditConfigKey, OnModalOpen, EditModalHandle } from "../configs/EditTypeDefinitions";
+import {
+  ItemMap,
+  EditConfig,
+  EditConfigKey,
+  OnModalOpen,
+  EditModalHandle,
+} from "../configs/EditTypeDefinitions";
 
-export const API_EDIT = "http://localhost:3000/cleaning-edit";
+export const API_EDIT = "/api/cleaning-edit";
 
 type ListProps = {
   title: string;
@@ -42,8 +48,8 @@ const List = ({ title, setTitle }: ListProps) => {
     }
   }, [type, selectedSpotID]);
 
-  const fetchData =  async() => {
-    try{
+  const fetchData = async () => {
+    try {
       let url = `${API_EDIT}/${type}`;
 
       //清掃箇所が指定された場合のみ（checklist）
@@ -82,17 +88,18 @@ const List = ({ title, setTitle }: ListProps) => {
   };
 
   //Data変換
-  const getItemFormat = (
-    type: string,
-    value: string[],
-    action: string
-  ) => {
-    switch(type){
+  const getItemFormat = (type: string, value: string[], action: string) => {
+    switch (type) {
       case "user":
-        if(action === "authentication"){
+        if (action === "authentication") {
           return { status: value[0] };
         }
-        return { last_name: value[0], first_name: value[1], email: value[2], position: value[3] };
+        return {
+          last_name: value[0],
+          first_name: value[1],
+          email: value[2],
+          position: value[3],
+        };
 
       case "cleaning_type":
         return { type_name: value[0] };
@@ -102,14 +109,14 @@ const List = ({ title, setTitle }: ListProps) => {
 
       case "checklist":
         return { spot_id: Number(value[1]), item: value[2] };
-        
+
       default:
         return {};
     }
   };
 
   //CRUD
-  const addItem = async(input: string[]) => {
+  const addItem = async (input: string[]) => {
     await fetch(`${API_EDIT}/${type}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -118,7 +125,11 @@ const List = ({ title, setTitle }: ListProps) => {
     await fetchData();
   };
 
-  const editItem = async (input: string[], id: number | null, action: string) => {
+  const editItem = async (
+    input: string[],
+    id: number | null,
+    action: string
+  ) => {
     await fetch(`${API_EDIT}/${type}/${action}/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },

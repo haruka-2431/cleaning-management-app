@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-export const MY_API_URL = "http://localhost:3000/another";
+export const MY_API_URL = "/api/another";
 
 interface LocationTime {
   id: number;

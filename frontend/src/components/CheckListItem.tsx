@@ -1,4 +1,4 @@
-export const MY_API_URL = "http://localhost:3000/another";
+export const MY_API_URL = "/api/another";
 
 // チェックリストテンプレートの型定義
 interface ChecklistTemplate {
@@ -28,28 +28,31 @@ interface ChecklistItem {
 }
 
 // DBからエリアID取得
-export const getAreaIdByName = async (typeName: string, areaName: string): Promise<number | null> => {
+export const getAreaIdByName = async (
+  typeName: string,
+  areaName: string
+): Promise<number | null> => {
   try {
     console.log("エリアID取得開始:", typeName, areaName);
-    
+
     const response = await fetch(`${MY_API_URL}/cleaning_area`);
     const data: CleaningArea[] = await response.json();
-    
+
     console.log("cleaning_area データ:", data);
-    
+
     // 配列を直接処理
     if (!data || !Array.isArray(data)) {
       console.error("不正なcleaning_areaデータ:", data);
       return null;
     }
-    
-    const targetArea = data.find((area: CleaningArea) => 
-      area.type_name === typeName && area.area_name === areaName
+
+    const targetArea = data.find(
+      (area: CleaningArea) =>
+        area.type_name === typeName && area.area_name === areaName
     );
-    
+
     console.log("該当エリア:", targetArea);
     return targetArea ? targetArea.id : null;
-    
   } catch (err) {
     console.error("エリアID取得エラー:", err);
     return null;
@@ -57,49 +60,52 @@ export const getAreaIdByName = async (typeName: string, areaName: string): Promi
 };
 
 // DBからチェックリスト取得
-export const fetchChecklistTemplate = async (areaId: number): Promise<ChecklistTemplate> => {
+export const fetchChecklistTemplate = async (
+  areaId: number
+): Promise<ChecklistTemplate> => {
   try {
     console.log("チェックリスト取得開始 areaId:", areaId);
-    
+
     // cleaning_spot 取得
     const spotResponse = await fetch(`${MY_API_URL}/cleaning_spot`);
     const spotData: CleaningSpot[] = await spotResponse.json();
     console.log("cleaning_spot データ:", spotData);
-    
+
     // checklist 取得
     const checklistResponse = await fetch(`${MY_API_URL}/checklist`);
     const checklistData: ChecklistItem[] = await checklistResponse.json();
     console.log("checklist データ:", checklistData);
-    
+
     // エリア名取得
     const areaResponse = await fetch(`${MY_API_URL}/cleaning_area`);
     const areaData: CleaningArea[] = await areaResponse.json();
     const area = areaData.find((a: CleaningArea) => a.id === areaId);
-    
+
     // データ構築
     const template: ChecklistTemplate = {
       title: area ? area.area_name : "チェックリスト",
-      data: {}
+      data: {},
     };
-    
+
     // 該当エリアのスポットを取得
-    const areaSpots = spotData.filter((spot: CleaningSpot) => spot.area_id === areaId);
+    const areaSpots = spotData.filter(
+      (spot: CleaningSpot) => spot.area_id === areaId
+    );
     console.log("該当エリアのスポット:", areaSpots);
-    
+
     // 各スポットのチェックリスト項目を取得
     areaSpots.forEach((spot: CleaningSpot) => {
       const spotItems = checklistData
         .filter((item: ChecklistItem) => item.spot_id === spot.id)
         .map((item: ChecklistItem) => item.item);
-      
+
       if (spotItems.length > 0) {
         template.data[spot.location] = spotItems;
       }
     });
-    
+
     console.log("構築されたテンプレート:", template);
     return template;
-    
   } catch (err) {
     console.error("チェックリスト取得エラー:", err);
     return { title: "エラー", data: {} };
@@ -195,11 +201,9 @@ export const ChecklistTemplates: { [key: string]: ChecklistTemplate } = {
     data: {}, // チェックリストなし
   },
   harukichi: {
-    title: "民泊清掃 - 春吉 -", 
+    title: "民泊清掃 - 春吉 -",
     data: {
-      全体のゴミ回収: [
-        "全体のゴミ回収"
-      ],
+      全体のゴミ回収: ["全体のゴミ回収"],
       リビング: [
         "リネン交換　綺麗に伸びているか",
         "灰皿　汚れがない",
@@ -388,13 +392,16 @@ export const ChecklistTemplates: { [key: string]: ChecklistTemplate } = {
 };
 
 // 新しい動的取得関数
-export const getTemplateByTypeAndLocation = async (type: string, location: string): Promise<ChecklistTemplate> => {
+export const getTemplateByTypeAndLocation = async (
+  type: string,
+  location: string
+): Promise<ChecklistTemplate> => {
   try {
     console.log("テンプレート取得開始:", type, location);
-    
+
     // DBからエリアID取得
     const areaId = await getAreaIdByName(type, location);
-    
+
     if (areaId) {
       // DBからチェックリスト取得
       const template = await fetchChecklistTemplate(areaId);
@@ -410,7 +417,7 @@ export const getTemplateByTypeAndLocation = async (type: string, location: strin
       if (type === "巡回清掃") return ChecklistTemplates.junkai;
       if (type === "施設清掃") return ChecklistTemplates.shisetsu;
       if (type === "ハウスクリーニング") return ChecklistTemplates.house;
-      
+
       return ChecklistTemplates.tenjin; // デフォルト
     }
   } catch (err) {

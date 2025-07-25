@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 
-export const MY_API_URL = "http://localhost:3000/another";
+export const MY_API_URL = "/api/another";
 
 // 型定義
 interface CleanSelectProps {

@@ -5,7 +5,7 @@ import ReportTable from "../components/ReportTable";
 import ReportDetailModal from "../components/ReportDetailModal";
 import NoReportsCard from "../components/NoReportCard";
 
-export const MY_API_URL = "http://localhost:3000/another";
+export const MY_API_URL = "/api/another";
 
 // レポートデータ型定義
 export interface Report {
@@ -42,7 +42,7 @@ const Reportlist = () => {
     try {
       const response = await fetch(`${MY_API_URL}/cleaning_report`);
       const data = await response.json();
-      
+
       if (Array.isArray(data)) {
         if (data.length === 0) {
           setReportData(getStaticReportData());
@@ -55,15 +55,16 @@ const Reportlist = () => {
               subUser: item.sub_user_name || item.subUser || undefined,
               type: item.cleaning_type || item.type || "不明",
               area: item.cleaning_area || item.area || "不明",
-              startDatetime: item.start_datetime || item.startDatetime || "不明",
+              startDatetime:
+                item.start_datetime || item.startDatetime || "不明",
               endDatetime: item.end_datetime || item.endDatetime || "不明",
               status: Boolean(
-                item.status === 1 || 
-                item.status === true || 
-                item.status === "1" || 
-                item.is_confirmed === 1 || 
-                item.is_confirmed === true || 
-                item.is_confirmed === "1"
+                item.status === 1 ||
+                  item.status === true ||
+                  item.status === "1" ||
+                  item.is_confirmed === 1 ||
+                  item.is_confirmed === true ||
+                  item.is_confirmed === "1"
               ),
               // API更新用の生データを保持
               user_id: item.user_id,
@@ -73,17 +74,16 @@ const Reportlist = () => {
               raw_start_datetime: item.raw_start_datetime,
               raw_end_datetime: item.raw_end_datetime,
             };
-            
+
             return formatted;
           });
-          
+
           setReportData(formattedReports);
         }
       } else {
         console.error("データが配列ではありません");
         setReportData(getStaticReportData());
       }
-      
     } catch (err) {
       console.error("レポート取得エラー:", err);
       setReportData(getStaticReportData());
@@ -144,11 +144,13 @@ const Reportlist = () => {
   }, []);
 
   // レポートをフィルタリング
-  const filteredReports = reportData?.filter((report) => {
-    const isConfirmed = report.status;
-    const shouldShow = activeTab === "unconfirmed" ? !isConfirmed : isConfirmed;
-    return shouldShow;
-  }) || [];
+  const filteredReports =
+    reportData?.filter((report) => {
+      const isConfirmed = report.status;
+      const shouldShow =
+        activeTab === "unconfirmed" ? !isConfirmed : isConfirmed;
+      return shouldShow;
+    }) || [];
 
   // モーダル開閉のハンドラ
   const openDetailModal = useCallback((report: Report) => {
@@ -164,55 +166,63 @@ const Reportlist = () => {
     if (!selectedReport) {
       return;
     }
-    
+
     // 必須フィールドチェック
     const missingFields = [];
     if (!selectedReport.user_id) missingFields.push("user_id");
     if (!selectedReport.type_id) missingFields.push("type_id");
     if (!selectedReport.area_id) missingFields.push("area_id");
-    if (!selectedReport.raw_start_datetime) missingFields.push("raw_start_datetime");
-    if (!selectedReport.raw_end_datetime) missingFields.push("raw_end_datetime");
-    
+    if (!selectedReport.raw_start_datetime)
+      missingFields.push("raw_start_datetime");
+    if (!selectedReport.raw_end_datetime)
+      missingFields.push("raw_end_datetime");
+
     if (missingFields.length > 0) {
       console.error("必要なデータが不足しています:", missingFields.join(", "));
       alert(`データ不足: ${missingFields.join(", ")}`);
       return;
     }
-    
+
     try {
-      const formatDateTimeForMySQL = (isoString: string | null | undefined): string | null => {
+      const formatDateTimeForMySQL = (
+        isoString: string | null | undefined
+      ): string | null => {
         if (!isoString) return null;
-        return isoString.slice(0, 19).replace('T', ' ');
+        return isoString.slice(0, 19).replace("T", " ");
       };
-      
+
       const updateData = {
         user_id: selectedReport.user_id,
         sub_user_id: selectedReport.sub_user_id || null,
         type_id: selectedReport.type_id,
         area_id: selectedReport.area_id,
-        start_datetime: formatDateTimeForMySQL(selectedReport.raw_start_datetime),
+        start_datetime: formatDateTimeForMySQL(
+          selectedReport.raw_start_datetime
+        ),
         end_datetime: formatDateTimeForMySQL(selectedReport.raw_end_datetime),
-        status: 1
+        status: 1,
       };
-      
-      const response = await fetch(`${MY_API_URL}/cleaning_report/${selectedReport.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updateData),
-      });
-      
+
+      const response = await fetch(
+        `${MY_API_URL}/cleaning_report/${selectedReport.id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(updateData),
+        }
+      );
+
       if (!response.ok) {
         const errorText = await response.text();
         console.error("API更新エラー:", errorText);
         throw new Error(`API更新失敗: ${response.status} - ${errorText}`);
       }
-      
+
       // 成功処理
       closeDetailModal();
       await fetchReports();
       setActiveTab("confirmed");
       alert("確認済みに変更しました！");
-      
     } catch (error) {
       console.error("確認済み処理エラー:", error);
       alert(`エラー: ${error}`);
@@ -254,7 +264,7 @@ const Reportlist = () => {
             確認済み
           </button>
         </div>
-        
+
         {loading ? (
           <div className="flex items-center justify-center py-32">
             <div className="text-center">
@@ -263,14 +273,17 @@ const Reportlist = () => {
             </div>
           </div>
         ) : filteredReports.length > 0 ? (
-          <ReportTable reports={filteredReports} onOpenDetail={openDetailModal} />
+          <ReportTable
+            reports={filteredReports}
+            onOpenDetail={openDetailModal}
+          />
         ) : (
           <NoReportsCard activeTab={activeTab} />
         )}
       </div>
 
       <div className="fixed bottom-0 left-0 right-0 px-4 py-8 z-10 bg-white">
-        <button 
+        <button
           className="btn bg-cyan-800 text-white w-full gap-2 shadow-lg h-14"
           onClick={() => nav("/admin/cleaning-edit")}
         >
@@ -296,7 +309,7 @@ const Reportlist = () => {
           </svg>
         </button>
       </div>
-      
+
       <ReportDetailModal
         selectedReport={selectedReport}
         onClose={closeDetailModal}
