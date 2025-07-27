@@ -24,18 +24,7 @@ const ManagerSelect = ({
   const { setUserRole } = useAuth();
 
   const handleClick = (role: UserRole) => {
-  // AuthContextでロール設定
   setUserRole(role);
-  
-  // LocalStorageに保存
-  const userSelection = {
-    userType: role,
-    timestamp: Date.now(),
-    selectedAt: new Date().toISOString()
-  };
-  localStorage.setItem('cleaning-manager-user', JSON.stringify(userSelection));
-  
-  // 画面遷移
   nav(`/${role}`);
 }
 
