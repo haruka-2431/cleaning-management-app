@@ -6,17 +6,8 @@ import {
   ChevronDownIcon,
 } from "@heroicons/react/24/outline";
 import PhotoModal from "./PhotoModal";
+import { userService } from '../services/api';
 
-export const MY_API_URL = "/api/another";
-
-// 型定義
-interface User {
-  id: number;
-  name: string;
-  email: string;
-  position: string;
-  status: number;
-}
 
 interface ReportModalProps {
   isOpen: boolean;
@@ -45,34 +36,19 @@ const ReportModal = ({
   // ユーザー一覧取得
   useEffect(() => {
     const fetchUsers = async () => {
-      try {
-        const response = await fetch(`${MY_API_URL}/user`);
-        const data: User[] = await response.json();
-
-        // 配列を直接処理
-        if (!data || !Array.isArray(data)) {
-          console.error("不正なユーザーデータ形式:", data);
-          // フォールバック用静的データ
-          setRegisteredUsers([
-            "山田太郎",
-            "相沢佳奈",
-            "佐藤佳次",
-            "岡崎かなた",
-          ]);
-          return;
-        }
-
-        // status=1（アクティブ）のユーザーのみ取得
-        const activeUsers = data.filter((user: User) => user.status === 1);
-        const userNames = activeUsers.map((user: User) => user.name);
-
-        setRegisteredUsers(userNames);
-      } catch (err) {
-        console.error("ユーザー取得エラー:", err);
-        // フォールバック用静的データ
-        setRegisteredUsers(["山田太郎", "相沢佳奈", "佐藤佳次", "岡崎かなた"]);
-      }
-    };
+  try {
+    console.log("👥 新しいAPIサービスでユーザー取得開始");
+    
+    const userNames = await userService.getActiveUsers();
+    console.log("✅ ユーザー取得成功:", userNames);
+    
+    setRegisteredUsers(userNames);
+  } catch (err) {
+    console.error("❌ ユーザー取得エラー:", err);
+    // フォールバック処理（userService内で既に処理済み）
+    setRegisteredUsers(["山田太郎", "相沢佳奈", "佐藤佳次", "岡崎かなた"]);
+  }
+};
 
     if (isOpen) {
       fetchUsers();

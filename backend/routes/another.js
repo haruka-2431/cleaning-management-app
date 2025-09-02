@@ -61,7 +61,7 @@ module.exports = (connection) => {
       params = paramsBuilder(type, req.body);
     } catch (err) {
       console.error(`Parameter validation error for ${type}:`, err.message);
-      return res.status(400).send(err.message);
+      return res.status(400).json({ error: err.message, data: [] });
     }
 
     handleQuery({
@@ -122,6 +122,17 @@ module.exports = (connection) => {
       res,
       connection,
     });
+  });
+
+  // Checklist save endpoint
+  router.post("/checklist/save", (req, res) => {
+    const { checklistData } = req.body;
+    
+    if (!checklistData || !Array.isArray(checklistData)) {
+      return res.status(400).json({ error: "Invalid checklist data" });
+    }
+    
+    res.status(200).json({ success: true, message: "Checklist saved" });
   });
 
   return router;
@@ -201,20 +212,20 @@ function paramsBuilder(type, data, id = null) {
 
 function handleQuery({ type, key, params = [], res, connection }) {
   if (!isValidType(type)) {
-    return res.status(400).send("Invalid table name");
+    return res.status(400).json({ error: "Invalid table name", data: [] });
   }
 
   const sql = getSQL(type, key);
   if (!sql) {
     console.error(`SQL not found for type: ${type}, key: ${key}`);
-    return res.status(500).send("SQL Not Found");
+    return res.status(500).json({ error: "SQL Not Found", data: [] });
   }
 
   connection.query(sql, params, (err, result) => {
     if (err) {
       console.error(`Database error - Type: ${type}, Key: ${key}`);
       console.error(`Error code: ${err.code}, Message: ${err.sqlMessage}`);
-      return res.status(500).send(`Database operation failed`);
+      return res.status(500).json({ error: "Database operation failed", data: [], details: err.message });
     }
 
     if (key.startsWith("select")) {
@@ -227,12 +238,3 @@ function handleQuery({ type, key, params = [], res, connection }) {
   });
 }
 
- router.post("/checklist/save", (req, res) => {
-    const { checklistData } = req.body;
-    
-    if (!checklistData || !Array.isArray(checklistData)) {
-      return res.status(400).json({ error: "Invalid checklist data" });
-    }
-    
-    res.status(200).json({ success: true, message: "Checklist saved" });
-  });

@@ -16,7 +16,13 @@ export const SpotSelect = (areaID: number | "" = "") => {
     fetch(API_EDIT + `/cleaning_spot/select_spot/${areaID}`)
       .then((res) => res.json())
       .then((data) => {
-        setLocationList(data);
+        if (Array.isArray(data)) {
+          setLocationList(data);
+        } else if (data && Array.isArray(data.data)) {
+          setLocationList(data.data);
+        } else {
+          setLocationList([]);
+        }
         setSpotID("");
       })
       .catch((err) => {

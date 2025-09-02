@@ -15,7 +15,8 @@ import Checklist from "./pages/CheckList";
 import Reportlist from "./pages/ReportList";
 import CleaningEdit from "./pages/CleaningEdit";
 import List from "./pages/List";
-import Opening from './pages/Opening';
+import Opening from "./pages/Opening";
+import CompletedScreen from "./components/CompletedScreen";
 
 const App = () => {
   const [title, setTitle] = useState<string>("");
@@ -34,6 +35,10 @@ const App = () => {
           <Routes>
             <Route path="/" element={<Navigate to="/manager-select" />} />
             <Route path="/manager-select" element={<ManagerSelect />} />
+            
+            {/* 🆕 完了画面ルート追加 */}
+            <Route path="/completed" element={<CompletedScreen />} />
+            
             <Route
               path="/worker"
               element={

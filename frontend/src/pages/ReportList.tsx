@@ -43,12 +43,18 @@ const Reportlist = () => {
       const response = await fetch(`${MY_API_URL}/cleaning_report`);
       const data = await response.json();
 
-      if (Array.isArray(data)) {
-        if (data.length === 0) {
+      // エラーレスポンスの場合は data.data を確認
+      let actualData = data;
+      if (data && typeof data === 'object' && 'error' in data) {
+        actualData = data.data || [];
+      }
+
+      if (Array.isArray(actualData)) {
+        if (actualData.length === 0) {
           setReportData(getStaticReportData());
         } else {
           // データ形式を変換
-          const formattedReports = data.map((item) => {
+          const formattedReports = actualData.map((item) => {
             const formatted = {
               id: item.id || Math.random(),
               user: item.user_name || item.user || "不明",

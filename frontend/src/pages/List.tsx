@@ -15,7 +15,7 @@ import {
   EditModalHandle,
 } from "../configs/EditTypeDefinitions";
 
-export const API_EDIT = "/api/cleaning-edit";
+export const API_EDIT = "/cleaning-edit";
 
 type ListProps = {
   title: string;
@@ -58,6 +58,7 @@ const List = ({ title, setTitle }: ListProps) => {
       }
 
       const res = await fetch(url);
+      
       if (!res.ok) {
         const errText = await res.text(); // 応答の中身を確認
         console.error("Fetch failed with status:", res.status, errText);

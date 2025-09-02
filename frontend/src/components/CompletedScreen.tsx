@@ -1,11 +1,9 @@
 import { CheckIcon } from '@heroicons/react/24/outline';
 import { useNavigate } from 'react-router-dom';
 
-interface CompletedScreenProps {
-  nav: ReturnType<typeof useNavigate>;
-}
+const CompletedScreen = () => {
+  const navigate = useNavigate();
 
-const CompletedScreen = ({ nav }: CompletedScreenProps) => {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
       <div className="text-center space-y-8">
@@ -19,7 +17,7 @@ const CompletedScreen = ({ nav }: CompletedScreenProps) => {
           <p className="text-lg text-gray-700">お疲れ様でした！！</p>
         </div>
         <button
-          onClick={() => nav("/manager-select")}
+          onClick={() => navigate("/manager-select")}
           className="mt-6 bg-cyan-800 text-white font-medium py-4 px-20 rounded-lg"
         >
           ログイン画面に戻る

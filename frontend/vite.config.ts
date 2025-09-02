@@ -11,4 +11,18 @@ export default defineConfig({
       },
     }),
   ],
+  server: {
+    proxy: {
+      '/cleaning-edit': 'http://localhost:3000',
+      '/api': 'http://localhost:3000'
+    }
+  },
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: ['./src/test/setup.ts'],
+    typecheck: {
+      exclude: ['**/node_modules/**', '**/dist/**', '**/__tests__/**'],
+    },
+  },
 });

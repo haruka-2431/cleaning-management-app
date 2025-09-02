@@ -10,7 +10,15 @@ export const AreaSelect = (initialAreaID: number | "" = "") => {
   useEffect(() => {
     fetch(API_EDIT + "/cleaning_area")
       .then((res) => res.json())
-      .then((data) => setAreaList(data))
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setAreaList(data);
+        } else if (data && Array.isArray(data.data)) {
+          setAreaList(data.data);
+        } else {
+          setAreaList([]);
+        }
+      })
       .catch(() => setAreaList([]));
   }, []);
 

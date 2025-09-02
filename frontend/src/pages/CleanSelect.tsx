@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
+// 既存のインポートの下に追加
+import { areaService } from '../services/api';
 
-export const MY_API_URL = "/api/another";
 
 // 型定義
 interface CleanSelectProps {
@@ -15,12 +16,6 @@ interface LocationOption {
   label: string;
 }
 
-interface CleaningArea {
-  id: number;
-  type_name: string;
-  area_name: string;
-}
-
 const CleanSelect = ({}: CleanSelectProps) => {
   const nav = useNavigate();
 
@@ -30,43 +25,48 @@ const CleanSelect = ({}: CleanSelectProps) => {
 
   // DB から場所オプション取得
   const fetchLocationOptions = async (typeName: string) => {
-    try {
-      console.log("API呼び出し開始:", `${MY_API_URL}/cleaning_area`);
-
-      const response = await fetch(`${MY_API_URL}/cleaning_area`);
-      console.log("レスポンス状態:", response.status);
-
-      const data: CleaningArea[] = await response.json();
-      console.log("取得データ:", data);
-
-      // 配列を直接処理
-      if (!data || !Array.isArray(data)) {
-        console.error("不正なデータ形式:", data);
-        setLocationOptions(getStaticLocationOptions(typeName));
-        return;
-      }
-
-      // type_name でフィルタリングして area_name を取得
-      const filteredAreas = data.filter(
-        (item: CleaningArea) => item.type_name === typeName
-      );
-
-      // 重複する area_name を除去
-      const uniqueAreaNames = Array.from(
-        new Set(filteredAreas.map((item) => item.area_name))
-      );
-      const options = uniqueAreaNames.map((areaName: string) => ({
-        value: areaName,
-        label: areaName,
-      }));
-
-      console.log("フィルタ結果:", options);
-      setLocationOptions(options);
-    } catch (err) {
-      console.error("場所取得エラー:", err);
+  try {
+    console.log("🔗 新しいAPIサービスで場所取得:", typeName);
+    
+    const areas = await areaService.getAreas();
+    console.log("✅ エリアデータ取得成功:", areas);
+    
+    // 🔧 空配列の場合も静的データにフォールバック
+    if (!areas || areas.length === 0) {
+      console.log("⚠️ データが空のため、静的データを使用");
       setLocationOptions(getStaticLocationOptions(typeName));
+      return;
     }
-  };
+    
+    // type_name でフィルタリング
+    const filteredAreas = areas.filter(
+      (item) => item.type_name === typeName
+    );
+
+    // 重複する area_name を除去
+    const uniqueAreaNames = Array.from(
+      new Set(filteredAreas.map((item) => item.area_name))
+    );
+    const options = uniqueAreaNames.map((areaName: string) => ({
+      value: areaName,
+      label: areaName,
+    }));
+
+    console.log("🎯 フィルタ結果:", options);
+    
+    // 🔧 フィルタ結果が空の場合も静的データにフォールバック
+    if (options.length === 0) {
+      console.log("⚠️ フィルタ結果が空のため、静的データを使用");
+      setLocationOptions(getStaticLocationOptions(typeName));
+    } else {
+      setLocationOptions(options);
+    }
+    
+  } catch (err) {
+    console.error("❌ 場所取得エラー:", err);
+    setLocationOptions(getStaticLocationOptions(typeName));
+  }
+};
 
   // フォールバック用の静的データ関数
   const getStaticLocationOptions = (type: string): LocationOption[] => {

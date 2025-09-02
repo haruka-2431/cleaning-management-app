@@ -51,7 +51,7 @@ module.exports = (connection) => {
     try {
       params = paramsBuilder(type, req.body);
     } catch (err) {
-      return res.status(400).send(err.message);
+      return res.status(400).json({ error: err.message, data: [] });
     }
 
     handleQuery({
@@ -72,7 +72,7 @@ module.exports = (connection) => {
     try {
       params = paramsBuilder(type, req.body, id);
     } catch (err) {
-      return res.status(400).send(err.message);
+      return res.status(400).json({ error: err.message, data: [] });
     }
 
     handleQuery({
@@ -143,16 +143,16 @@ module.exports = (connection) => {
 
 function handleQuery({ type, key, params = [], res, connection }) {
   //typeが有効の物かどうか
-  if (!isValidType(type)) return res.status(400).send("Invalid table name");
+  if (!isValidType(type)) return res.status(400).json({ error: "Invalid table name", data: [] });
 
   const sql = getSQL(type, key);
   //指定されたSQLがあるかどうか
-  if (!sql) return res.status(500).send("SQL Not Found");
+  if (!sql) return res.status(500).json({ error: "SQL Not Found", data: [] });
 
   connection.query(sql, params, (err, result) => {
     if (err) {
       console.error(err);
-      return res.status(500).send("DB error");
+      return res.status(500).json({ error: "Database operation failed", data: [], details: err.message });
     }
 
     if (key.startsWith("select")) {

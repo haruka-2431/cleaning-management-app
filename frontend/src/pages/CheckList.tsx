@@ -1,13 +1,11 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import { getTemplateByTypeAndLocation } from "../components/CheckListItem";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import ChecklistSection from "../components/CheckListSection";
 import ReportModal from "../components/ReportModal";
-import CompletedScreen from "../components/CompletedScreen";
-
-export const MY_API_URL = "/api/another";
+import { typeService, areaService, reportService } from "../services/api";
 
 interface CheckedItems {
   [key: string]: boolean;
@@ -21,9 +19,10 @@ interface ChecklistTemplate {
 }
 
 const Checklist = () => {
-  const nav = useNavigate();
   const location = useLocation();
   const cleaningData = location.state;
+
+  const navigate = useNavigate();
 
   const [selectedTemplate, setSelectedTemplate] = useState<string>("");
   const [currentChecklist, setCurrentChecklist] = useState<
@@ -32,50 +31,12 @@ const Checklist = () => {
   const [checkedItems, setCheckedItems] = useState<CheckedItems>({});
   const [reportModalOpen, setReportModalOpen] = useState<boolean>(false);
   const [uploadedPhotos, setUploadedPhotos] = useState<File[]>([]);
-  const [completed, setCompleted] = useState<boolean>(false);
   const [selectedPersonInCharge, setSelectedPersonInCharge] =
     useState<string>("追加者なし");
   const [loading, setLoading] = useState<boolean>(false);
 
   // 作業時間記録用の状態
   const [workStartTime, setWorkStartTime] = useState<Date | null>(null);
-
-  // ID取得用のヘルパー関数
-  const getTypeIdByName = async (typeName: string): Promise<number> => {
-    try {
-      const response = await fetch(`${MY_API_URL}/cleaning_type`);
-      const data = await response.json();
-      const type = data.find((item: any) => item.type_name === typeName);
-      return type ? type.id : 1;
-    } catch (err) {
-      console.error("type_id取得エラー:", err);
-      return 1;
-    }
-  };
-
-  const getAreaIdByName = async (areaName: string): Promise<number> => {
-    try {
-      // 巡回清掃・ハウスクリーニング・選択なしの場合
-      if (areaName === "選択なし") {
-        const currentType = cleaningData?.type;
-        if (currentType === "巡回清掃") {
-          return 1; // 巡回清掃用のarea_id
-        } else if (currentType === "ハウスクリーニング") {
-          return 2; // ハウスクリーニング用のarea_id
-        } else {
-          return 1;
-        }
-      }
-
-      const response = await fetch(`${MY_API_URL}/cleaning_area`);
-      const data = await response.json();
-      const area = data.find((item: any) => item.area_name === areaName);
-      return area ? area.id : 1;
-    } catch (err) {
-      console.error("area_id取得エラー:", err);
-      return 1; // デフォルト値
-    }
-  };
 
   useEffect(() => {
     const loadTemplate = async () => {
@@ -111,179 +72,75 @@ const Checklist = () => {
     }
   }, [workStartTime]);
 
-  // 写真保存関数
-  const savePhotoToDbWithReportId = async (
-    photoUrl: string,
-    reportId: number
-  ) => {
-    try {
-      const requestData = {
-        report_id: reportId,
-        photo_url: photoUrl,
-        posted_datetime: new Date()
-          .toISOString()
-          .slice(0, 19)
-          .replace("T", " "),
-      };
-
-      const response = await fetch(`${MY_API_URL}/photo`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(requestData),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error("写真API エラー:", errorText);
-        throw new Error(`写真API エラー: ${response.status} - ${errorText}`);
-      }
-    } catch (err) {
-      console.error("写真保存エラー:", err);
-      throw err;
-    }
-  };
-
-  const saveLocationTimeToDbWithReportId = async (
-    taskName: string,
-    requiredTime: string,
-    reportId: number
-  ) => {
-    try {
-      const requestData = {
-        report_id: reportId,
-        task_name: taskName,
-        required_time: requiredTime,
-      };
-
-      const response = await fetch(`${MY_API_URL}/location_time`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(requestData),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error("作業時間API エラー:", errorText);
-        throw new Error(
-          `作業時間API エラー: ${response.status} - ${errorText}`
-        );
-      }
-    } catch (err) {
-      console.error("作業時間保存エラー:", err);
-      throw err;
-    }
-  };
-
-  const saveChecklistToDbWithReportId = async (
-    checkedItems: CheckedItems,
-    reportId: number
-  ) => {
-    try {
-      const checkedList = Object.entries(checkedItems)
-        .filter(([_, checked]) => checked)
-        .map(([key]) => key);
-
-      const requestData = {
-        report_id: reportId,
-        checked_items: checkedList,
-        timestamp: new Date().toISOString(),
-      };
-
-      const response = await fetch(`${MY_API_URL}/checklist/save`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(requestData),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error("チェックリストAPI エラー:", errorText);
-      }
-    } catch (err) {
-      console.error("チェックリスト保存エラー:", err);
-    }
-  };
 
   //submitReport関数
-  const submitReport = async () => {
-    try {
-      // 写真のバリデーション
-      if (uploadedPhotos.length === 0) {
-        throw new Error("写真を1枚以上選択してください");
-      }
+const submitReport = async () => {
+  try {
+    console.log("🚀 新しいAPIサービスで報告書提出開始");
 
-      // cleaning_reportレコードを作成
-      const workEndTime = new Date();
+    // 🔧 実際のデータから取得
+    const currentType = cleaningData?.type || "民泊清掃";
+    const currentArea = cleaningData?.area || "春吉民泊"; 
+    const currentUser = "作業者"; // 後でユーザー選択機能から取得
 
-      // 動的にIDを取得
-      const typeId = await getTypeIdByName(cleaningData?.type || "民泊清掃");
-      const areaId = await getAreaIdByName(
-        cleaningData?.location || "選択なし"
-      );
+    // ID取得
+    const typeId = await typeService.getTypeIdByName(currentType);
+    const areaId = await areaService.getAreaIdByName(currentArea, currentType);
+    
+    console.log("✅ ID取得完了:", { typeId, areaId });
 
-      const reportData = {
-        user_id: 1, // 実際のユーザーIDに変更（ログイン機能実装後）
-        sub_user_id: selectedPersonInCharge !== "追加者なし" ? 2 : null, // 実際のサブユーザーIDに変更
-        type_id: typeId,
-        area_id: areaId,
-        start_datetime:
-          workStartTime?.toISOString().slice(0, 19).replace("T", " ") ||
-          new Date().toISOString().slice(0, 19).replace("T", " "),
-        end_datetime: workEndTime.toISOString().slice(0, 19).replace("T", " "),
-        status: false, // 未確認として作成
-      };
+    // チェック項目を変換
+    const reportItems = Object.entries(checkedItems).map(([key, checked]) => ({
+      category: "一般",
+      item: key,
+      completed: checked,
+      comment: ""
+    }));
 
-      const reportResponse = await fetch(`${MY_API_URL}/cleaning_report`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(reportData),
+    // 報告書データ作成
+    const reportData = {
+      cleaning_type_id: typeId,
+      cleaning_area_id: areaId,
+      cleaning_type: currentType,
+      cleaning_area: currentArea,
+      user_name: currentUser,
+      items: reportItems,
+      photos: [], // 写真機能は後で実装
+      submitted_at: new Date().toISOString()
+    };
+
+    // 報告書提出
+    const result = await reportService.submitReport(reportData);
+    
+    if (result.success) {
+      console.log("🎉 報告書提出成功:", result.reportId);
+      
+      // 成功メッセージ
+      alert(`✅ 報告書の提出が完了しました！\n\n📋 報告書ID: ${result.reportId}\n🎯 清掃タイプ: ${currentType}\n📍 清掃場所: ${currentArea}\n👤 作業者: ${currentUser}`);
+      
+      // 🆕 完了画面に遷移
+      console.log("🎊 完了画面に移行します");
+      navigate('/completed', { 
+        state: { 
+          reportId: result.reportId,
+          type: currentType,
+          area: currentArea,
+          user: currentUser
+        }
       });
-
-      if (!reportResponse.ok) {
-        const errorText = await reportResponse.text();
-        console.error("cleaning_reportエラー:", errorText);
-        throw new Error(
-          `cleaning_report作成エラー: ${reportResponse.status} - ${errorText}`
-        );
-      }
-
-      const reportResult = await reportResponse.json();
-      const actualReportId = reportResult.insertedId;
-
-      // 実際のreport_idを使ってチェックリスト保存
-      await saveChecklistToDbWithReportId(checkedItems, actualReportId);
-
-      // 実際のreport_idを使って写真保存
-      if (uploadedPhotos.length > 0) {
-        const dummyPhotoUrl = "https://example.com/photo.jpg";
-        await savePhotoToDbWithReportId(dummyPhotoUrl, actualReportId);
-      }
-
-      // 実際のreport_idを使って作業時間保存
-      if (workStartTime) {
-        const workDurationMs = workEndTime.getTime() - workStartTime.getTime();
-        const workDurationMinutes = Math.floor(workDurationMs / 60000);
-        const hours = Math.floor(workDurationMinutes / 60);
-        const minutes = workDurationMinutes % 60;
-
-        const requiredTime = `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:00`;
-
-        await saveLocationTimeToDbWithReportId(
-          cleaningData?.location || "清掃作業",
-          requiredTime,
-          actualReportId
-        );
-      }
-
-      setReportModalOpen(false);
-      setCompleted(true);
-    } catch (err) {
-      console.error("報告書提出エラー:", err);
-      const errorMessage =
-        err instanceof Error ? err.message : `不明なエラー: ${err}`;
-      alert(`エラー: ${errorMessage}`);
+      
+      // フォームリセット
+      setCheckedItems({});
+      console.log("🔄 フォームをリセットしました");
+    } else {
+      throw new Error("提出処理に失敗しました");
     }
-  };
+
+  } catch (error) {
+    console.error('❌ 報告書提出エラー:', error);
+    alert("❌ 報告書の提出中にエラーが発生しました。\n\n📱 再度お試しください。");
+  }
+};
 
   const toggleCheck = (section: string, item: string) => {
     const key = `${selectedTemplate}-${section}-${item}`;
@@ -296,10 +153,6 @@ const Checklist = () => {
   const generateReport = () => {
     setReportModalOpen(true);
   };
-
-  if (completed) {
-    return <CompletedScreen nav={nav} />;
-  }
 
   if (loading) {
     return (

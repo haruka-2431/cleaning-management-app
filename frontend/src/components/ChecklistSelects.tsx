@@ -20,13 +20,23 @@ export const ChecklistSelects = ({
 
   const [selectedAreaID, setSelectAreaID] = useState<number | "">("");
 
-  //cleaning_area一覧取得
-  useEffect(() => {
-    fetch(API_EDIT + "/cleaning_area")
-      .then((res) => res.json())
-      .then((data) => setAreaList(data))
-      .catch(() => setAreaList([]));
-  }, []);
+// デバッグ用にconsole.logを追加
+useEffect(() => {
+  console.log("API_EDIT:", API_EDIT); // APIのURLを確認
+  fetch(API_EDIT + "/cleaning_area")
+    .then((res) => {
+      console.log("Response status:", res.status); // ステータス確認
+      return res.json();
+    })
+    .then((data) => {
+      console.log("API response:", data); // レスポンス内容確認
+      setAreaList(data);
+    })
+    .catch((error) => {
+      console.error("API error:", error); // エラー詳細確認
+      setAreaList([]);
+    });
+}, []);
 
   //清掃場所が選ばれたらcleaning_spot一覧取得
   useEffect(() => {

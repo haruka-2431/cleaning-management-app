@@ -32,3 +32,4 @@ module.exports = function getSQL(type, key) {
   }
   return sql;
 };
+
