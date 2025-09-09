@@ -1,5 +1,5 @@
 export class ApiClient {
-  private baseUrl = "/api/another";
+  private baseUrl = "http://localhost:3000/api/another";
 
   async get<T>(endpoint: string): Promise<T> {
     try {

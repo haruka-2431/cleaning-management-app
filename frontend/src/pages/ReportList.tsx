@@ -5,7 +5,7 @@ import ReportTable from "../components/ReportTable";
 import ReportDetailModal from "../components/ReportDetailModal";
 import NoReportsCard from "../components/NoReportCard";
 
-export const MY_API_URL = "/api/another";
+export const MY_API_URL = "http://localhost:3000/api/another";
 
 // レポートデータ型定義
 export interface Report {

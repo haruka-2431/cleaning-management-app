@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-export const MY_API_URL = "/api/another";
+export const MY_API_URL = "http://localhost:3000/api/another";
 
 interface Photo {
   id: number;

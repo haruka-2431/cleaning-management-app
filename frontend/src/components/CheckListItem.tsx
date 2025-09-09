@@ -1,4 +1,4 @@
-export const MY_API_URL = "/api/another";
+export const MY_API_URL = "http://localhost:3000/api/another";
 
 // チェックリストテンプレートの型定義
 interface ChecklistTemplate {

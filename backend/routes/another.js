@@ -81,7 +81,7 @@ module.exports = (connection) => {
 
     if (!isValidType(type)) {
       console.error(`Invalid table name: ${type}`);
-      return res.status(400).send("Invalid table name");
+      return res.status(400).json({ error: "Invalid table name", data: [] });
     }
 
     try {
@@ -89,7 +89,7 @@ module.exports = (connection) => {
       handleQuery({ type, key: "update", params, res, connection });
     } catch (error) {
       console.error(`Parameter validation error for ${type}:`, error.message);
-      return res.status(400).send(`Missing required fields for ${type}`);
+      return res.status(400).json({ error: `Missing required fields for ${type}`, data: [] });
     }
   });
 

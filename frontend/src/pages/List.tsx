@@ -15,7 +15,7 @@ import {
   EditModalHandle,
 } from "../configs/EditTypeDefinitions";
 
-export const API_EDIT = "/cleaning-edit";
+export const API_EDIT = "http://localhost:3000/cleaning-edit";
 
 type ListProps = {
   title: string;
