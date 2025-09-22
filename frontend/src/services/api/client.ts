@@ -1,51 +1,100 @@
-export class ApiClient {
-  private baseUrl = "http://localhost:3000/api/another";
+import { supabase } from '../../lib/supabase';
 
-  async get<T>(endpoint: string): Promise<T> {
+export class SupabaseClient {
+  async get<T>(tableName: string, filters?: Record<string, any>): Promise<T> {
     try {
-      console.log(`🔗 API GET: ${this.baseUrl}${endpoint}`);
+      console.log(`🔗 Supabase GET: ${tableName}`, filters);
       
-      const response = await fetch(`${this.baseUrl}${endpoint}`);
+      let query = supabase.from(tableName).select('*');
       
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error(`❌ API Error ${response.status}:`, errorText);
-        throw new Error(`API Error: ${response.status} - ${errorText}`);
+      if (filters) {
+        Object.entries(filters).forEach(([key, value]) => {
+          query = query.eq(key, value);
+        });
       }
       
-      const data = await response.json();
-      console.log(`✅ API Success:`, data);
-      return data;
+      const { data, error } = await query;
+      
+      if (error) {
+        console.error(`❌ Supabase Error:`, error);
+        throw new Error(`Supabase Error: ${error.message}`);
+      }
+      
+      console.log(`✅ Supabase Success:`, data);
+      return data as T;
     } catch (error) {
-      console.error(`❌ API GET Error [${endpoint}]:`, error);
+      console.error(`❌ Supabase GET Error [${tableName}]:`, error);
       throw error;
     }
   }
 
-  async post<T>(endpoint: string, body: unknown): Promise<T> {
+  async post<T>(tableName: string, body: unknown): Promise<T> {
     try {
-      console.log(`🔗 API POST: ${this.baseUrl}${endpoint}`, body);
+      console.log(`🔗 Supabase POST: ${tableName}`, body);
       
-      const response = await fetch(`${this.baseUrl}${endpoint}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error(`❌ API Error ${response.status}:`, errorText);
-        throw new Error(`API Error: ${response.status} - ${errorText}`);
+      const { data, error } = await supabase
+        .from(tableName)
+        .insert(body)
+        .select();
+      
+      if (error) {
+        console.error(`❌ Supabase Error:`, error);
+        throw new Error(`Supabase Error: ${error.message}`);
       }
-
-      const data = await response.json();
-      console.log(`✅ API POST Success:`, data);
-      return data;
+      
+      console.log(`✅ Supabase POST Success:`, data);
+      return data as T;
     } catch (error) {
-      console.error(`❌ API POST Error [${endpoint}]:`, error);
+      console.error(`❌ Supabase POST Error [${tableName}]:`, error);
+      throw error;
+    }
+  }
+
+  async update<T>(tableName: string, id: number, body: unknown): Promise<T> {
+    try {
+      console.log(`🔗 Supabase UPDATE: ${tableName}`, { id, body });
+      
+      const { data, error } = await supabase
+        .from(tableName)
+        .update(body)
+        .eq('id', id)
+        .select();
+      
+      if (error) {
+        console.error(`❌ Supabase Error:`, error);
+        throw new Error(`Supabase Error: ${error.message}`);
+      }
+      
+      console.log(`✅ Supabase UPDATE Success:`, data);
+      return data as T;
+    } catch (error) {
+      console.error(`❌ Supabase UPDATE Error [${tableName}]:`, error);
+      throw error;
+    }
+  }
+
+  async delete<T>(tableName: string, id: number): Promise<T> {
+    try {
+      console.log(`🔗 Supabase DELETE: ${tableName}`, { id });
+      
+      const { data, error } = await supabase
+        .from(tableName)
+        .delete()
+        .eq('id', id)
+        .select();
+      
+      if (error) {
+        console.error(`❌ Supabase Error:`, error);
+        throw new Error(`Supabase Error: ${error.message}`);
+      }
+      
+      console.log(`✅ Supabase DELETE Success:`, data);
+      return data as T;
+    } catch (error) {
+      console.error(`❌ Supabase DELETE Error [${tableName}]:`, error);
       throw error;
     }
   }
 }
 
-export const apiClient = new ApiClient();
+export const apiClient = new SupabaseClient();

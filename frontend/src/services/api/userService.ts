@@ -13,7 +13,7 @@ export class UserService {
     try {
       console.log("👥 アクティブユーザー取得開始");
       
-      const users = await apiClient.get<User[]>('/user');
+      const users = await apiClient.get<User[]>('users');
       console.log("📋 取得したユーザー:", users);
       
       // 配列の検証

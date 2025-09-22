@@ -27,7 +27,18 @@ export class ReportService {
 
       // まずAPIを試行
       try {
-        const result = await apiClient.post('/cleaning_report', reportData);
+        // Supabaseテーブル構造に合わせてデータ変換
+        const supabaseData = {
+          user_id: 1, // デフォルトユーザー（後で認証機能追加時に修正）
+          type_id: reportData.cleaning_type_id || 2,
+          area_id: reportData.cleaning_area_id || 3,
+          start_datetime: new Date().toISOString(),
+          end_datetime: new Date().toISOString(),
+          status: 'completed'
+        };
+        
+        console.log("📊 Supabase送信データ:", supabaseData);
+        const result = await apiClient.post('cleaning_report', supabaseData);
         console.log("✅ API経由で提出成功:", result);
         return { success: true, reportId: (result as any)?.id || this.generateReportId() };
       } catch (apiError) {
