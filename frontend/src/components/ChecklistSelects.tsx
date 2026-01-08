@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { CleaningAreaItem, LayoutType } from "../configs/EditTypeDefinitions";
-import { API_EDIT } from "../pages/List";
+import { apiClient } from "../services/api/client";
 
 type CleaningLocation = { id: number; location: string };
 
@@ -17,38 +17,37 @@ export const ChecklistSelects = ({
 }: Props) => {
   const [areaList, setAreaList] = useState<CleaningAreaItem[]>([]);
   const [locationList, setLocationList] = useState<CleaningLocation[]>([]);
-
   const [selectedAreaID, setSelectAreaID] = useState<number | "">("");
 
-// デバッグ用にconsole.logを追加
-useEffect(() => {
-  console.log("API_EDIT:", API_EDIT); // APIのURLを確認
-  fetch(API_EDIT + "/cleaning_area")
-    .then((res) => {
-      console.log("Response status:", res.status); // ステータス確認
-      return res.json();
-    })
-    .then((data) => {
-      console.log("API response:", data); // レスポンス内容確認
-      setAreaList(data);
-    })
-    .catch((error) => {
-      console.error("API error:", error); // エラー詳細確認
-      setAreaList([]);
-    });
-}, []);
+ // ✅ Supabaseからcleaning_area取得
+  useEffect(() => {
+    apiClient.get<CleaningAreaItem[]>("cleaning_area")
+      .then((data) => {
+        console.log("cleaning_area取得成功:", data);
+        setAreaList(data);
+      })
+      .catch((error) => {
+        console.error("cleaning_area取得エラー:", error);
+        setAreaList([]);
+      });
+  }, []);
 
-  //清掃場所が選ばれたらcleaning_spot一覧取得
+  // ✅ Supabaseからcleaning_spot取得
   useEffect(() => {
     if (selectedAreaID === "") {
       setLocationList([]);
       return;
     }
 
-    fetch(API_EDIT + `/cleaning_spot/select_spot/${selectedAreaID}`)
-      .then((res) => res.json())
-      .then((data) => setLocationList(data))
-      .catch(() => setLocationList([]));
+    apiClient.get<CleaningLocation[]>("cleaning_spot", { area_id: selectedAreaID })
+      .then((data) => {
+        console.log("cleaning_spot取得成功:", data);
+        setLocationList(data);
+      })
+      .catch((error) => {
+        console.error("cleaning_spot取得エラー:", error);
+        setLocationList([]);
+      });
   }, [selectedAreaID]);
 
   return (

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { CleaningSpotItem } from "./EditTypeDefinitions";
-import { API_EDIT } from "../pages/List";
+import { apiClient } from "../services/api/client";
 
 export const SpotSelect = (areaID: number | "" = "") => {
   const [spotID, setSpotID] = useState<number | "">("");
@@ -13,13 +13,10 @@ export const SpotSelect = (areaID: number | "" = "") => {
       return;
     }
 
-    fetch(API_EDIT + `/cleaning_spot/select_spot/${areaID}`)
-      .then((res) => res.json())
+    apiClient.get<CleaningSpotItem[]>("cleaning_spot", { area_id: areaID })
       .then((data) => {
         if (Array.isArray(data)) {
           setLocationList(data);
-        } else if (data && Array.isArray(data.data)) {
-          setLocationList(data.data);
         } else {
           setLocationList([]);
         }
