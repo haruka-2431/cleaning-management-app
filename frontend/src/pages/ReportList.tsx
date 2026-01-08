@@ -4,8 +4,7 @@ import { useNavigate } from "react-router-dom";
 import ReportTable from "../components/ReportTable";
 import ReportDetailModal from "../components/ReportDetailModal";
 import NoReportsCard from "../components/NoReportCard";
-
-export const MY_API_URL = "http://localhost:3000/api/another";
+import { apiClient } from "../services/api/client";
 
 // レポートデータ型定義
 export interface Report {
@@ -36,53 +35,41 @@ const Reportlist = () => {
   const [reportData, setReportData] = useState<Report[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
 
-  // DBからレポートデータ取得
+  // ✅ Supabaseからレポートデータ取得
   const fetchReports = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${MY_API_URL}/cleaning_report`);
-      const data = await response.json();
+      const data = await apiClient.get<any[]>("cleaning_report");
 
-      // エラーレスポンスの場合は data.data を確認
-      let actualData = data;
-      if (data && typeof data === 'object' && 'error' in data) {
-        actualData = data.data || [];
-      }
-
-      if (Array.isArray(actualData)) {
-        if (actualData.length === 0) {
+      if (Array.isArray(data)) {
+        if (data.length === 0) {
           setReportData(getStaticReportData());
         } else {
           // データ形式を変換
-          const formattedReports = actualData.map((item) => {
-            const formatted = {
-              id: item.id || Math.random(),
-              user: item.user_name || item.user || "不明",
-              subUser: item.sub_user_name || item.subUser || undefined,
-              type: item.cleaning_type || item.type || "不明",
-              area: item.cleaning_area || item.area || "不明",
-              startDatetime:
-                item.start_datetime || item.startDatetime || "不明",
-              endDatetime: item.end_datetime || item.endDatetime || "不明",
-              status: Boolean(
-                item.status === 1 ||
-                  item.status === true ||
-                  item.status === "1" ||
-                  item.is_confirmed === 1 ||
-                  item.is_confirmed === true ||
-                  item.is_confirmed === "1"
-              ),
-              // API更新用の生データを保持
-              user_id: item.user_id,
-              sub_user_id: item.sub_user_id,
-              type_id: item.type_id,
-              area_id: item.area_id,
-              raw_start_datetime: item.raw_start_datetime,
-              raw_end_datetime: item.raw_end_datetime,
-            };
-
-            return formatted;
-          });
+          const formattedReports = data.map((item) => ({
+            id: item.id || Math.random(),
+            user: item.user_name || item.user || "不明",
+            subUser: item.sub_user_name || item.subUser || undefined,
+            type: item.cleaning_type || item.type || "不明",
+            area: item.cleaning_area || item.area || "不明",
+            startDatetime: item.start_datetime || item.startDatetime || "不明",
+            endDatetime: item.end_datetime || item.endDatetime || "不明",
+            status: Boolean(
+              item.status === 1 ||
+                item.status === true ||
+                item.status === "1" ||
+                item.is_confirmed === 1 ||
+                item.is_confirmed === true ||
+                item.is_confirmed === "1"
+            ),
+            // API更新用の生データを保持
+            user_id: item.user_id,
+            sub_user_id: item.sub_user_id,
+            type_id: item.type_id,
+            area_id: item.area_id,
+            raw_start_datetime: item.raw_start_datetime,
+            raw_end_datetime: item.raw_end_datetime,
+          }));
 
           setReportData(formattedReports);
         }
@@ -167,7 +154,7 @@ const Reportlist = () => {
     setSelectedReport(null);
   }, []);
 
-  // 確認済み処理
+  // ✅ Supabaseで確認済み処理
   const handleConfirmReport = async () => {
     if (!selectedReport) {
       return;
@@ -190,39 +177,17 @@ const Reportlist = () => {
     }
 
     try {
-      const formatDateTimeForMySQL = (
-        isoString: string | null | undefined
-      ): string | null => {
-        if (!isoString) return null;
-        return isoString.slice(0, 19).replace("T", " ");
-      };
-
       const updateData = {
         user_id: selectedReport.user_id,
         sub_user_id: selectedReport.sub_user_id || null,
         type_id: selectedReport.type_id,
         area_id: selectedReport.area_id,
-        start_datetime: formatDateTimeForMySQL(
-          selectedReport.raw_start_datetime
-        ),
-        end_datetime: formatDateTimeForMySQL(selectedReport.raw_end_datetime),
+        start_datetime: selectedReport.raw_start_datetime,
+        end_datetime: selectedReport.raw_end_datetime,
         status: 1,
       };
 
-      const response = await fetch(
-        `${MY_API_URL}/cleaning_report/${selectedReport.id}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(updateData),
-        }
-      );
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error("API更新エラー:", errorText);
-        throw new Error(`API更新失敗: ${response.status} - ${errorText}`);
-      }
+      await apiClient.update("cleaning_report", selectedReport.id, updateData);
 
       // 成功処理
       closeDetailModal();
