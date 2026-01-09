@@ -54,6 +54,9 @@ const List = ({ title, setTitle }: ListProps) => {
     try {
       let fetchedData;
 
+      // テーブル名をマッピング
+    const tableName = type === 'user' ? 'users' : type;
+
       //清掃箇所が指定された場合のみ（checklist）
       if (type === "checklist" && selectedSpotID !== "") {
         fetchedData = await apiClient.get<ItemMap[typeof type][]>(
@@ -65,7 +68,7 @@ const List = ({ title, setTitle }: ListProps) => {
         setData([]);
         return;
       } else {
-        fetchedData = await apiClient.get<ItemMap[typeof type][]>(type);
+        fetchedData = await apiClient.get<ItemMap[typeof type][]>(tableName);
       }
 
       setData(fetchedData);
