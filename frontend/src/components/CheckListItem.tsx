@@ -1,4 +1,4 @@
-export const MY_API_URL = "http://localhost:3000/api/another";
+import { apiClient } from "../services/api/client";
 
 // チェックリストテンプレートの型定義
 interface ChecklistTemplate {
@@ -27,7 +27,7 @@ interface ChecklistItem {
   item: string;
 }
 
-// DBからエリアID取得
+// ✅ Supabase: DBからエリアID取得
 export const getAreaIdByName = async (
   typeName: string,
   areaName: string
@@ -35,12 +35,9 @@ export const getAreaIdByName = async (
   try {
     console.log("エリアID取得開始:", typeName, areaName);
 
-    const response = await fetch(`${MY_API_URL}/cleaning_area`);
-    const data: CleaningArea[] = await response.json();
-
+    const data = await apiClient.get<CleaningArea[]>("cleaning_area");
     console.log("cleaning_area データ:", data);
 
-    // 配列を直接処理
     if (!data || !Array.isArray(data)) {
       console.error("不正なcleaning_areaデータ:", data);
       return null;
@@ -59,7 +56,7 @@ export const getAreaIdByName = async (
   }
 };
 
-// DBからチェックリスト取得
+// ✅ Supabase: DBからチェックリスト取得
 export const fetchChecklistTemplate = async (
   areaId: number
 ): Promise<ChecklistTemplate> => {
@@ -67,18 +64,15 @@ export const fetchChecklistTemplate = async (
     console.log("チェックリスト取得開始 areaId:", areaId);
 
     // cleaning_spot 取得
-    const spotResponse = await fetch(`${MY_API_URL}/cleaning_spot`);
-    const spotData: CleaningSpot[] = await spotResponse.json();
+    const spotData = await apiClient.get<CleaningSpot[]>("cleaning_spot");
     console.log("cleaning_spot データ:", spotData);
 
     // checklist 取得
-    const checklistResponse = await fetch(`${MY_API_URL}/checklist`);
-    const checklistData: ChecklistItem[] = await checklistResponse.json();
+    const checklistData = await apiClient.get<ChecklistItem[]>("checklist");
     console.log("checklist データ:", checklistData);
 
     // エリア名取得
-    const areaResponse = await fetch(`${MY_API_URL}/cleaning_area`);
-    const areaData: CleaningArea[] = await areaResponse.json();
+    const areaData = await apiClient.get<CleaningArea[]>("cleaning_area");
     const area = areaData.find((a: CleaningArea) => a.id === areaId);
 
     // データ構築
@@ -198,7 +192,7 @@ export const ChecklistTemplates: { [key: string]: ChecklistTemplate } = {
   },
   junkai: {
     title: "巡回清掃",
-    data: {}, // チェックリストなし
+    data: {},
   },
   harukichi: {
     title: "民泊清掃 - 春吉 -",
@@ -391,7 +385,7 @@ export const ChecklistTemplates: { [key: string]: ChecklistTemplate } = {
   },
 };
 
-// 新しい動的取得関数
+// ✅ Supabase: 新しい動的取得関数
 export const getTemplateByTypeAndLocation = async (
   type: string,
   location: string
