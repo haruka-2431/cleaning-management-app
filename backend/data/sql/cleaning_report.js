@@ -6,8 +6,8 @@ module.exports = {
       cr.sub_user_id,
       cr.type_id,
       cr.area_id,
-      cr.start_datetime as raw_start_datetime,
-      cr.end_datetime as raw_end_datetime,
+      cr.start_datetime as start_datetime,
+      cr.end_datetime as end_datetime,
       DATE_FORMAT(cr.start_datetime, '%Y/%m/%d %H:%i') as start_datetime,
       DATE_FORMAT(cr.end_datetime, '%Y/%m/%d %H:%i') as end_datetime,
       cr.status,
@@ -26,20 +26,20 @@ module.exports = {
     LEFT JOIN cleaning_area ca ON cr.area_id = ca.id
     ORDER BY cr.start_datetime DESC
   `,
-  
+
   insert: `
     INSERT INTO cleaning_report (user_id, sub_user_id, type_id, area_id, start_datetime, end_datetime, status)
     VALUES (?, ?, ?, ?, ?, ?, ?)
   `,
-  
+
   update: `
     UPDATE cleaning_report 
     SET user_id = ?, sub_user_id = ?, type_id = ?, area_id = ?, start_datetime = ?, end_datetime = ?, status = ?
     WHERE id = ?
   `,
-  
+
   delete: `
     DELETE FROM cleaning_report 
     WHERE id = ?
-  `
+  `,
 };

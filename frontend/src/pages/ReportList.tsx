@@ -21,8 +21,8 @@ export interface Report {
   sub_user_id?: number | null;
   type_id?: number;
   area_id?: number;
-  raw_start_datetime?: string;
-  raw_end_datetime?: string;
+  start_datetime?: string;
+  end_datetime?: string;
 }
 
 // タブの型定義
@@ -56,19 +56,19 @@ const Reportlist = () => {
             endDatetime: item.end_datetime || item.endDatetime || "不明",
             status: Boolean(
               item.status === 1 ||
-                item.status === true ||
-                item.status === "1" ||
-                item.is_confirmed === 1 ||
-                item.is_confirmed === true ||
-                item.is_confirmed === "1"
+              item.status === true ||
+              item.status === "1" ||
+              item.is_confirmed === 1 ||
+              item.is_confirmed === true ||
+              item.is_confirmed === "1",
             ),
             // API更新用の生データを保持
             user_id: item.user_id,
             sub_user_id: item.sub_user_id,
             type_id: item.type_id,
             area_id: item.area_id,
-            raw_start_datetime: item.raw_start_datetime,
-            raw_end_datetime: item.raw_end_datetime,
+            start_datetime: item.start_datetime,
+            end_datetime: item.end_datetime,
           }));
 
           setReportData(formattedReports);
@@ -165,10 +165,8 @@ const Reportlist = () => {
     if (!selectedReport.user_id) missingFields.push("user_id");
     if (!selectedReport.type_id) missingFields.push("type_id");
     if (!selectedReport.area_id) missingFields.push("area_id");
-    if (!selectedReport.raw_start_datetime)
-      missingFields.push("raw_start_datetime");
-    if (!selectedReport.raw_end_datetime)
-      missingFields.push("raw_end_datetime");
+    if (!selectedReport.start_datetime) missingFields.push("start_datetime");
+    if (!selectedReport.end_datetime) missingFields.push("end_datetime");
 
     if (missingFields.length > 0) {
       console.error("必要なデータが不足しています:", missingFields.join(", "));
@@ -182,8 +180,8 @@ const Reportlist = () => {
         sub_user_id: selectedReport.sub_user_id || null,
         type_id: selectedReport.type_id,
         area_id: selectedReport.area_id,
-        start_datetime: selectedReport.raw_start_datetime,
-        end_datetime: selectedReport.raw_end_datetime,
+        start_datetime: selectedReport.start_datetime,
+        end_datetime: selectedReport.end_datetime,
         status: 1,
       };
 
