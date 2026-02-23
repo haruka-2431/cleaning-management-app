@@ -35,7 +35,7 @@ const Reportlist = () => {
   const [reportData, setReportData] = useState<Report[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
 
-  // ✅ Supabaseからレポートデータ取得
+  // Supabaseからレポートデータ取得
   const fetchReports = async () => {
     setLoading(true);
     try {
