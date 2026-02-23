@@ -76,9 +76,7 @@ const Checklist = () => {
   //submitReport関数
 const submitReport = async () => {
   try {
-    console.log("🚀 新しいAPIサービスで報告書提出開始");
-
-    // 🔧 実際のデータから取得
+    // 実際のデータから取得
     const currentType = cleaningData?.type || "民泊清掃";
     const currentArea = cleaningData?.area || "春吉民泊"; 
     const currentUser = "作業者"; // 後でユーザー選択機能から取得
@@ -118,7 +116,7 @@ const submitReport = async () => {
       // 成功メッセージ
       alert(`✅ 報告書の提出が完了しました！\n\n📋 報告書ID: ${result.reportId}\n🎯 清掃タイプ: ${currentType}\n📍 清掃場所: ${currentArea}\n👤 作業者: ${currentUser}`);
       
-      // 🆕 完了画面に遷移
+      // 完了画面に遷移
       console.log("🎊 完了画面に移行します");
       navigate('/completed', { 
         state: { 
