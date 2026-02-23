@@ -29,7 +29,6 @@ export const CleaningAreaModalContent = ({
     setTypeID(Number.isNaN(parsedType) ? "" : parsedType);
   }, [valueBefore])
 
-  // modeがaddならinputValueをリセット
   useEffect(() => {
     if (mode === "add") {
       setInputValue([]);
