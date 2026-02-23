@@ -4,6 +4,7 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { Report } from "../pages/ReportList";
+import { formatDateTime } from "../configs/formatDateTime"; 
 
 interface ReportDetailModalProps {
   selectedReport: Report | null;
@@ -72,7 +73,7 @@ const ReportDetailModal = ({
                     作業開始日時
                   </td>
                   <td className="p-2 lg:p-3 text-xs lg:text-sm font-mono">
-                    {selectedReport.startDatetime}
+                    {formatDateTime(selectedReport.startDatetime)}
                   </td>
                 </tr>
                 <tr>
@@ -86,7 +87,7 @@ const ReportDetailModal = ({
                     作業終了日時
                   </td>
                   <td className="p-2 lg:p-3 text-xs lg:text-sm font-mono">
-                    {selectedReport.endDatetime}
+                    {formatDateTime(selectedReport.endDatetime)}
                   </td>
                 </tr>
               </tbody>
@@ -126,7 +127,7 @@ const ReportDetailModal = ({
                     作業開始日時
                   </td>
                   <td className="p-2 text-xs w-1/2 font-mono">
-                    {selectedReport.startDatetime}
+                    {formatDateTime(selectedReport.startDatetime)}
                   </td>
                 </tr>
                 <tr>
@@ -134,7 +135,7 @@ const ReportDetailModal = ({
                     作業終了日時
                   </td>
                   <td className="p-2 text-xs w-1/2 font-mono">
-                    {selectedReport.endDatetime}
+                    {formatDateTime(selectedReport.endDatetime)}
                   </td>
                 </tr>
               </tbody>
