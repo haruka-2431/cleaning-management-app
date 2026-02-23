@@ -1,4 +1,4 @@
-import { apiClient } from './client';
+import { apiClient } from "./client";
 
 export interface CleaningReport {
   id: string;
@@ -18,9 +18,11 @@ export interface CleaningReport {
 }
 
 export class ReportService {
-  private readonly STORAGE_KEY = 'cleaning_reports';
+  private readonly STORAGE_KEY = "cleaning_reports";
 
-  async submitReport(reportData: any): Promise<{ success: boolean; reportId: string }> {
+  async submitReport(
+    reportData: any,
+  ): Promise<{ success: boolean; reportId: string }> {
     try {
       console.log("📝 新しいAPIサービスで報告書提出開始");
       console.log("📋 提出データ:", reportData);
@@ -29,26 +31,37 @@ export class ReportService {
       try {
         // Supabaseテーブル構造に合わせてデータ変換
         const supabaseData = {
-          user_id: 1, // デフォルトユーザー（後で認証機能追加時に修正）
-          type_id: reportData.cleaning_type_id || 2,
-          area_id: reportData.cleaning_area_id || 3,
+          user_id: 1,
+          type_id: reportData.cleaning_type_id,
+          area_id: reportData.cleaning_area_id,
+          cleaning_type: reportData.cleaning_type, // デフォルト値なし
+          cleaning_area: reportData.cleaning_area, // デフォルト値なし
+          user_name: reportData.user_name, // デフォルト値なし
           start_datetime: new Date().toISOString(),
           end_datetime: new Date().toISOString(),
-          status: 'completed'
+          status: "completed",
         };
-        
+
+        // デバッグ用にログ出力
+        console.log("📊 保存する名前:", {
+          type: reportData.cleaning_type,
+          area: reportData.cleaning_area,
+          user: reportData.user_name,
+        });
         console.log("📊 Supabase送信データ:", supabaseData);
-        const result = await apiClient.post('cleaning_report', supabaseData);
+        const result = await apiClient.post("cleaning_report", supabaseData);
         console.log("✅ API経由で提出成功:", result);
-        return { success: true, reportId: (result as any)?.id || this.generateReportId() };
+        return {
+          success: true,
+          reportId: (result as any)?.id || this.generateReportId(),
+        };
       } catch (apiError) {
         console.log("⚠️ API未実装、ローカル保存に切り替え");
         // APIエラー時はローカル保存
         return this.saveToLocal(reportData);
       }
-
     } catch (error) {
-      console.error('❌ 報告書提出エラー:', error);
+      console.error("❌ 報告書提出エラー:", error);
       // エラー時もローカル保存で成功扱い
       return this.saveToLocal(reportData);
     }
@@ -60,13 +73,13 @@ export class ReportService {
       const report: CleaningReport = {
         id: reportId,
         type: reportData.cleaning_type || "民泊清掃",
-        area: reportData.cleaning_area || "春吉民泊", 
+        area: reportData.cleaning_area || "春吉民泊",
         user: reportData.user_name || "作業者",
-        date: new Date().toISOString().split('T')[0],
+        date: new Date().toISOString().split("T")[0],
         items: reportData.items || [],
         photos: reportData.photos || [],
         totalScore: this.calculateScore(reportData.items || []),
-        submittedAt: new Date().toISOString()
+        submittedAt: new Date().toISOString(),
       };
 
       // ローカルストレージに保存
@@ -79,14 +92,14 @@ export class ReportService {
 
       return { success: true, reportId };
     } catch (error) {
-      console.error('❌ ローカル保存エラー:', error);
-      return { success: false, reportId: '' };
+      console.error("❌ ローカル保存エラー:", error);
+      return { success: false, reportId: "" };
     }
   }
 
   private calculateScore(items: any[]): number {
     if (!items.length) return 100;
-    const completedItems = items.filter(item => item.completed).length;
+    const completedItems = items.filter((item) => item.completed).length;
     return Math.round((completedItems / items.length) * 100);
   }
 
@@ -103,15 +116,18 @@ export class ReportService {
     }
   }
 
-  // ポートフォリオ用: 提出履歴表示機能
+  // テスト用: 提出履歴表示機能
   async getReports(): Promise<CleaningReport[]> {
     console.log("📋 報告書履歴取得");
     const reports = this.getStoredReports();
     console.log("📊 取得した報告書:", reports.length, "件");
-    return reports.sort((a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime());
+    return reports.sort(
+      (a, b) =>
+        new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime(),
+    );
   }
 
-  // ポートフォリオ用: デモデータ作成
+  // テスト用: デモデータ作成
   createDemoData(): void {
     const demoReports: CleaningReport[] = [
       {
@@ -123,24 +139,29 @@ export class ReportService {
         items: [
           { category: "リビング", item: "掃除機がけ", completed: true },
           { category: "キッチン", item: "食器洗い", completed: true },
-          { category: "バスルーム", item: "浴槽清掃", completed: true }
+          { category: "バスルーム", item: "浴槽清掃", completed: true },
         ],
         totalScore: 100,
-        submittedAt: "2025-08-19T10:30:00Z"
+        submittedAt: "2025-08-19T10:30:00Z",
       },
       {
-        id: "RPT-DEMO-002", 
+        id: "RPT-DEMO-002",
         type: "施設清掃",
         area: "ラナシカ乙金",
         user: "相沢佳奈",
         date: "2025-08-18",
         items: [
           { category: "エントランス", item: "床清掃", completed: true },
-          { category: "廊下", item: "モップがけ", completed: false, comment: "時間不足" }
+          {
+            category: "廊下",
+            item: "モップがけ",
+            completed: false,
+            comment: "時間不足",
+          },
         ],
         totalScore: 50,
-        submittedAt: "2025-08-18T15:45:00Z"
-      }
+        submittedAt: "2025-08-18T15:45:00Z",
+      },
     ];
 
     localStorage.setItem(this.STORAGE_KEY, JSON.stringify(demoReports));
