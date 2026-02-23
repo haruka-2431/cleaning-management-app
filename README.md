@@ -31,10 +31,10 @@
 
 ## ✨ 主な機能
 
-- **作業報告の入力・管理** - 清掃作業の開始・終了時刻、担当者、場所を記録
+- **作業報告の入力・管理** - 清掃作業の場所、担当者、開始・終了時刻を記録
 - **チェックリスト機能** - 清掃箇所ごとの詳細なチェック項目を管理
-- **レポート確認** - 作業履歴の一覧表示・検索
-- **データ編集** - 清掃タイプ、エリア、チェックリスト項目の追加・編集・削除
+- **レポート確認** - 作業履歴の一覧表示・詳細確認。未確認・確認済みをタブで管理
+- **データ編集** - 清掃タイプ、エリア、チェックリスト、担当者情報の追加・編集・削除
 
 ## 🛠️ 技術スタック
 
@@ -55,7 +55,7 @@
 
 ## 📁 プロジェクト構成
 ```
-cleaning-management-system/
+cleaning-manager-app/
 ├── frontend/          # フロントエンドアプリケーション
 │   ├── src/
 │   │   ├── components/   # Reactコンポーネント
@@ -76,8 +76,8 @@ cleaning-management-system/
 
 1. リポジトリをクローン
 ```bash
-git clone https://github.com/haruka-2431/cleaning-management-system.git
-cd cleaning-management-system/frontend
+git clone https://github.com/haruka-2431/cleaning-manager-app.git
+cd cleaning-manager-app/frontend
 ```
 
 2. 依存パッケージをインストール
@@ -124,7 +124,7 @@ npm run build
 ## 📝 今後の改善予定
 
 - [ ] ユーザー認証機能の実装
-- [ ] 画像アップロード機能の追加
+- [ ] 画像保存機能の実装（Supabaseへのアップロード）
 - [ ] レスポンシブデザインの最適化
 - [ ] パフォーマンス改善
 
