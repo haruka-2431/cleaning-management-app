@@ -7,6 +7,28 @@
 
 **本番環境:** https://cleaning-management-app.netlify.app
 
+### 📸 画面イメージ
+
+#### 作業開始
+<img src="docs/images/screenshot-start.png" width="600" alt="作業開始">
+
+清掃タイプと清掃場所を選択して作業を開始。
+
+#### チェックリスト
+<img src="docs/images/screenshot-checklist.png" width="600" alt="チェックリスト">
+
+清掃箇所ごとの詳細なチェック項目を管理。リアルタイムで作業状況を記録。
+
+#### レポート一覧
+<img src="docs/images/screenshot-report-list.png" width="600" alt="レポート一覧">
+
+作業履歴を一覧表示。未確認・確認済みをタブで切り替え可能。
+
+#### レポート詳細
+<img src="docs/images/screenshot-report-detail.png" width="600" alt="レポート詳細">
+
+作業内容の詳細確認と、確認済みステータスの変更が可能。写真付きで作業記録を保存。
+
 ## ✨ 主な機能
 
 - **作業報告の入力・管理** - 清掃作業の開始・終了時刻、担当者、場所を記録
