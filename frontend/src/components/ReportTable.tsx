@@ -1,4 +1,6 @@
-// propsの型定義
+import { formatDateTime } from "../configs/formatDateTime"; 
+
+
 interface Report {
   id: number;
   user: string;
@@ -43,10 +45,10 @@ const ReportTable = ({ reports, onOpenDetail }: ReportTableProps) => {
             <div className="text-xs lg:text-[16px]">{report.type}</div>
             <div className="hidden lg:block lg:text-[16px]">{report.area}</div>
             <div className="text-xs lg:text-sm font-mono">
-              {report.startDatetime}
+              {formatDateTime(report.startDatetime)}
             </div>
             <div className="hidden lg:block text-xs lg:text-sm font-mono">
-              {report.endDatetime}
+              {formatDateTime(report.endDatetime)}
             </div>
             <div className="flex justify-center">
               <button
